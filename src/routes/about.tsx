@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
-import { ArrowLeft, Flame, Moon, Star, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Flame } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { fetchPage, fetchSettings, fetchTeam, type TeamMember } from "@/lib/site-data";
@@ -27,10 +27,10 @@ export const Route = createFileRoute("/about")({
 });
 
 const STATS = [
-  { icon: Flame, label: "Always Fresh" },
-  { icon: Moon, label: "Open Till 6AM" },
-  { icon: Star, label: "Larkana's Finest" },
-  { icon: ShieldCheck, label: "Halal Certified" },
+  { icon: "🔥", label: "Always Fresh" },
+  { icon: "🌙", label: "Open Till 6AM" },
+  { icon: "⭐", label: "Larkana's Finest" },
+  { icon: "✅", label: "Halal Certified" },
 ];
 
 function initials(name: string) {
@@ -42,60 +42,77 @@ function AboutPage() {
   const { data: settings } = useSuspenseQuery(settingsQO);
   const { data: team } = useSuspenseQuery(teamQO);
 
+  const story = page?.content || settings.about_us || "";
+
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-[#0A0A0A]">
       <SiteHeader />
-      <main className="flex-1 mx-auto max-w-6xl w-full px-4 sm:px-6 py-10">
-        <Link to="/" className="inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-foreground mb-6">
+      <main className="flex-1 mx-auto w-full max-w-[1000px] px-6 py-12 sm:py-16">
+        <Link to="/" className="inline-flex items-center gap-1.5 text-xs font-bold text-muted-foreground hover:text-[var(--primary)] mb-6 transition-colors">
           <ArrowLeft className="h-3.5 w-3.5" /> Back to Home
         </Link>
 
-        {/* Story section */}
-        <section className="grid lg:grid-cols-[280px_1fr] gap-8 items-start">
-          <div className="relative grid place-items-center aspect-square rounded-3xl bg-[#141414] border border-border overflow-hidden">
-            <div className="absolute inset-0 fire-gradient opacity-10" />
-            <div className="absolute inset-0 shadow-[inset_0_0_80px_rgba(255,69,0,0.35)]" />
-            <div className="relative grid h-32 w-32 place-items-center rounded-2xl fire-gradient glow-orange">
-              <Flame className="h-14 w-14 text-white" />
+        {/* HERO */}
+        <div className="rounded-2xl bg-[#141414] border border-[#2A2A2A] border-l-4 border-l-[#FF4500] p-6 sm:p-8">
+          <div className="flex items-start gap-4">
+            <div className="grid h-14 w-14 shrink-0 place-items-center rounded-xl fire-gradient">
+              <Flame className="h-7 w-7 text-white" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h1 className="text-3xl sm:text-4xl font-black text-white">About Kitchen 86</h1>
+              <p className="mt-1.5 text-sm sm:text-base text-muted-foreground">Our Story, Our Mission, Our Team</p>
+              <span className="mt-3 inline-flex items-center rounded-full bg-[#FF4500]/15 border border-[#FF4500]/30 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-[#FF4500]">
+                Est. 2024 • Larkana, Sindh
+              </span>
             </div>
           </div>
-          <div>
-            <h1 className="text-4xl sm:text-5xl font-black"><span className="fire-text">{page?.title ?? "About Kitchen 86"}</span></h1>
-            <div className="mt-5 space-y-4 text-sm sm:text-base text-foreground/90 leading-relaxed whitespace-pre-line">
-              {page?.content ?? settings.about_us ?? ""}
-            </div>
-            <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {STATS.map((s) => (
-                <div key={s.label} className="rounded-xl border border-border bg-[#141414] px-3 py-3 text-center">
-                  <s.icon className="h-5 w-5 mx-auto text-[var(--gold)]" />
-                  <div className="mt-1.5 text-[11px] font-black uppercase tracking-wider">{s.label}</div>
-                </div>
-              ))}
-            </div>
+        </div>
+
+        {/* STORY */}
+        <section className="mt-6 rounded-xl bg-[#141414] border border-[#2A2A2A] border-l-[3px] border-l-[#FF4500] p-6 sm:p-8 relative">
+          <header className="flex items-center gap-3 mb-3">
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#FF4500] text-white text-sm">🔥</span>
+            <h2 className="text-lg font-bold text-white">Our Story</h2>
+          </header>
+          <div className="relative pl-6">
+            <span aria-hidden className="absolute -left-1 -top-2 text-5xl leading-none text-[#FF4500]/40 font-serif">“</span>
+            <div className="text-[15px] leading-[1.8] text-[#AAAAAA] whitespace-pre-line">{story}</div>
           </div>
         </section>
 
-        {/* Team section */}
-        <section className="mt-16">
-          <h2 className="text-3xl sm:text-4xl font-black text-center">Meet Our Team <span className="ml-2">👨‍🍳</span></h2>
-          <p className="mt-2 text-center text-sm text-muted-foreground">The passionate people behind every delicious meal</p>
+        {/* STATS */}
+        <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {STATS.map((s) => (
+            <div key={s.label} className="rounded-xl bg-[#141414] border border-[#2A2A2A] p-4 text-center hover:border-[#FF4500] transition-colors">
+              <div className="text-3xl" aria-hidden>{s.icon}</div>
+              <div className="mt-2 text-[11px] sm:text-xs font-black uppercase tracking-wider text-white">{s.label}</div>
+            </div>
+          ))}
+        </div>
 
+        {/* TEAM */}
+        <section className="mt-12">
+          <div className="text-center">
+            <h2 className="text-2xl sm:text-3xl font-black text-white">Meet Our Team <span aria-hidden>👨‍🍳</span></h2>
+            <p className="mt-1.5 text-sm text-muted-foreground">The people behind every delicious meal</p>
+          </div>
           {team.length === 0 ? (
-            <div className="mt-10 text-center text-muted-foreground text-sm">Team members coming soon.</div>
+            <div className="mt-8 text-center text-sm text-muted-foreground">Team members coming soon.</div>
           ) : (
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {team.map((m: TeamMember) => (
-                <div key={m.id} className="rounded-2xl border border-border bg-[#141414] p-6 text-center hover:border-primary transition">
-                  <div className="mx-auto h-[120px] w-[120px] rounded-full border-2 border-[var(--primary)] overflow-hidden grid place-items-center bg-[var(--secondary-bg)]">
+                <div key={m.id} className="rounded-2xl bg-[#141414] border border-[#2A2A2A] p-6 text-center hover:-translate-y-1 hover:border-[#FF4500] hover:shadow-[0_8px_30px_-10px_rgba(255,69,0,0.4)] transition-all">
+                  <div className="mx-auto h-[100px] w-[100px] rounded-full overflow-hidden border-2 border-[#FF4500] grid place-items-center bg-[#1A1A1A]">
                     {m.image_url ? (
                       <img src={m.image_url} alt={m.name} className="h-full w-full object-cover" loading="lazy" />
                     ) : (
-                      <div className="h-full w-full grid place-items-center fire-gradient text-white text-2xl font-black">{initials(m.name)}</div>
+                      <div className="h-full w-full grid place-items-center fire-gradient text-white text-xl font-black">{initials(m.name)}</div>
                     )}
                   </div>
-                  <div className="mt-4 text-lg font-black">{m.name}</div>
-                  <div className="mt-0.5 text-xs font-bold uppercase tracking-wider text-[var(--primary)]">{m.role}</div>
-                  {m.bio && <p className="mt-3 text-xs text-muted-foreground leading-relaxed">{m.bio}</p>}
+                  <div className="mt-4 text-base font-bold text-white">{m.name}</div>
+                  <div className="mt-0.5 text-[13px] text-[#FF4500] font-semibold">{m.role}</div>
+                  <div className="mt-3 border-t border-[#2A2A2A]" />
+                  {m.bio && <p className="mt-3 text-[13px] text-[#AAAAAA] leading-relaxed line-clamp-3">{m.bio}</p>}
                 </div>
               ))}
             </div>
