@@ -142,7 +142,7 @@ function Checkout() {
       } catch {}
 
       toast.success("Order placed! 🔥");
-      navigate({ to: "/order-success", search: { o: order.order_number } });
+      navigate({ to: "/order-success", search: { o: order.order_number, m: form.payment, s: screenshotUrl ? 1 : 0 } });
     } catch (e: any) {
       toast.error(e.message ?? "Could not place order");
     } finally {
