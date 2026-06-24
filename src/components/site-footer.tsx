@@ -23,8 +23,8 @@ export function SiteFooter({ settings }: { settings: Record<string, string> }) {
             <li><Link to="/menu" className="text-muted-foreground hover:text-foreground">Menu</Link></li>
             <li><a href="/#deals" className="text-muted-foreground hover:text-foreground">Deals</a></li>
             <li><Link to="/track" className="text-muted-foreground hover:text-foreground">Track Order</Link></li>
-            <li><a href="/#about" className="text-muted-foreground hover:text-foreground">About</a></li>
-            <li><a href="/#contact" className="text-muted-foreground hover:text-foreground">Contact</a></li>
+            <li><Link to="/about" className="text-muted-foreground hover:text-foreground">About Us</Link></li>
+            <li><Link to="/contact" className="text-muted-foreground hover:text-foreground">Contact Us</Link></li>
           </ul>
         </div>
 
