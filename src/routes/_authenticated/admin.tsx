@@ -879,6 +879,67 @@ function PaymentsTab() {
   );
 }
 
+/* -------- PAYMENT SCREENSHOT VIEW -------- */
+function PaymentScreenshot({ order, onVerified }: { order: any; onVerified: () => void }) {
+  const [url, setUrl] = useState<string>("");
+  const [lightbox, setLightbox] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const raw: string = order.payment_screenshot_url ?? "";
+      if (!raw) return;
+      // Path like "payment-screenshots/abc.jpg" or just "abc.jpg"
+      const path = raw.includes("/") ? raw.split("/").slice(-2).join("/").replace(/^payment-screenshots\//, "") : raw;
+      const { data } = await sb.storage.from("payment-screenshots").createSignedUrl(path, 60 * 60);
+      if (!cancelled && data?.signedUrl) setUrl(data.signedUrl);
+    })();
+    return () => { cancelled = true; };
+  }, [order.payment_screenshot_url]);
+
+  async function verify(v: boolean) {
+    setBusy(true);
+    const { error } = await sb.from("orders").update({ payment_verified: v }).eq("id", order.id);
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success(v ? "Payment verified ✓" : "Marked unverified");
+    onVerified();
+  }
+
+  return (
+    <div className="rounded-lg border border-border bg-card p-3 flex flex-col sm:flex-row gap-3">
+      {url ? (
+        <button onClick={()=>setLightbox(true)} className="shrink-0">
+          <img src={url} alt="Payment proof" className="h-24 w-24 sm:h-28 sm:w-28 rounded-lg object-cover border border-border hover:border-primary transition" />
+        </button>
+      ) : (
+        <div className="h-24 w-24 sm:h-28 sm:w-28 rounded-lg bg-[var(--secondary-bg)] grid place-items-center text-xs text-muted-foreground">Loading…</div>
+      )}
+      <div className="flex-1">
+        <div className="font-bold text-sm">💳 Payment Proof</div>
+        <div className="text-xs text-muted-foreground mt-0.5">Customer uploaded a screenshot. Tap image to view full size.</div>
+        <div className="mt-2 flex gap-2">
+          {order.payment_verified ? (
+            <>
+              <span className="inline-flex items-center gap-1 rounded-lg bg-[var(--success)]/15 text-[var(--success)] px-3 py-1.5 text-xs font-black"><ShieldCheck className="h-3.5 w-3.5"/> Verified</span>
+              <button disabled={busy} onClick={()=>verify(false)} className="rounded-lg border border-border px-3 py-1.5 text-xs font-bold hover:border-destructive text-destructive">Unverify</button>
+            </>
+          ) : (
+            <button disabled={busy} onClick={()=>verify(true)} className="inline-flex items-center gap-1 rounded-lg fire-gradient px-3 py-1.5 text-xs font-bold text-white"><Check className="h-3.5 w-3.5"/> Verify Payment</button>
+          )}
+        </div>
+      </div>
+      {lightbox && url && (
+        <div className="fixed inset-0 z-[60] bg-black/90 grid place-items-center p-4" onClick={()=>setLightbox(false)}>
+          <img src={url} alt="Payment proof" className="max-h-[90vh] max-w-full rounded-lg" />
+          <button className="absolute top-4 right-4 grid place-items-center h-10 w-10 rounded-full bg-white/10 text-white"><X className="h-5 w-5"/></button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* -------- CART SUGGESTIONS -------- */
 function SuggestionsTab() {
   const qc = useQueryClient();
