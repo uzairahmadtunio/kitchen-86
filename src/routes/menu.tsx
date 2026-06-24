@@ -61,7 +61,7 @@ function MenuPage() {
 
       <section className="mx-auto max-w-7xl px-4 sm:px-6 py-10 flex-1">
         {active === "deals" ? (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:gap-5 grid-cols-2 lg:grid-cols-3">
             {deals.map((d) => <DealCard key={d.id} deal={d} />)}
           </div>
         ) : active === "all" ? (
@@ -72,7 +72,7 @@ function MenuPage() {
               return (
                 <div key={c.id}>
                   <h2 className="text-2xl font-black mb-5">{c.icon} {c.name}</h2>
-                  <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-3 sm:gap-5 grid-cols-2 lg:grid-cols-3">
                     {items.map((m) => <MenuCard key={m.id} item={m} onOpen={setOpenItem} />)}
                   </div>
                 </div>
@@ -80,7 +80,7 @@ function MenuPage() {
             })}
           </div>
         ) : (
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 sm:gap-5 grid-cols-2 lg:grid-cols-3">
             {filtered.map((m) => <MenuCard key={m.id} item={m} onOpen={setOpenItem} />)}
           </div>
         )}
