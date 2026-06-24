@@ -230,11 +230,19 @@ function Checkout() {
                 </div>
               )}
               {selectedPayment && (selectedPayment.instructions || selectedPayment.account_number) && (
-                <div className="mt-3 rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2.5 text-xs space-y-1">
+                <div className="mt-3 rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2.5 text-xs space-y-1.5">
                   {selectedPayment.instructions && <div className="text-foreground">{selectedPayment.instructions}</div>}
                   {selectedPayment.account_title && <div><span className="text-muted-foreground">Account Title:</span> <b>{selectedPayment.account_title}</b></div>}
-                  {selectedPayment.account_number && <div><span className="text-muted-foreground">Account #:</span> <b className="font-mono text-[var(--gold)]">{selectedPayment.account_number}</b></div>}
-                  <div className="pt-1 text-foreground">📱 Send <b className="text-[var(--gold)]">PKR {total}</b> to <b className="font-mono">{selectedPayment.account_number}</b></div>
+                  {selectedPayment.account_number && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-muted-foreground">Account #:</span>
+                      <CopyChip value={selectedPayment.account_number} />
+                    </div>
+                  )}
+                  <div className="pt-1 text-foreground flex items-center gap-2 flex-wrap">
+                    <span>📱 Send <b className="text-[var(--gold)]">PKR {total}</b> to</span>
+                    {selectedPayment.account_number && <CopyChip value={selectedPayment.account_number} />}
+                  </div>
                 </div>
               )}
               {isOnlinePayment && (
