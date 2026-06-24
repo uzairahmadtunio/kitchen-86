@@ -37,7 +37,7 @@ function Success() {
           <div className="mt-6 flex flex-col gap-2">
             {o && (() => {
               const last = typeof window !== "undefined" ? getLastOrder() : null;
-              const ph = last?.order_number === o ? last.phone : "";
+              const ph = last && last.order_number === o ? last.phone : "";
               return (
                 <Link to="/track" search={{ o, p: ph }} className="inline-flex justify-center items-center gap-2 rounded-xl fire-gradient px-5 py-3 text-sm font-black uppercase text-white">
                   <Package className="h-4 w-4" /> Track Your Order
