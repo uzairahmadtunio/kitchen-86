@@ -279,13 +279,19 @@ export function ItemDetailModal({
 
         {/* Sticky add-to-cart */}
         <div className="absolute sm:static bottom-0 inset-x-0 border-t border-border bg-card p-4 sm:rounded-b-2xl">
-          <button
-            onClick={handleAdd}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-xl fire-gradient px-6 py-3.5 text-sm font-black uppercase text-white"
-          >
-            <ShoppingCart className="h-4 w-4" />
-            Add to Cart — {pkr(total)}
-          </button>
+          {item.is_available === false ? (
+            <button disabled className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-muted px-6 py-3.5 text-sm font-black uppercase text-muted-foreground cursor-not-allowed">
+              Currently Unavailable
+            </button>
+          ) : (
+            <button
+              onClick={handleAdd}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl fire-gradient px-6 py-3.5 text-sm font-black uppercase text-white"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              Add to Cart — {pkr(total)}
+            </button>
+          )}
         </div>
       </div>
     </div>
