@@ -32,7 +32,7 @@ const schema = z.object({
   address: z.string().trim().min(8, "Enter delivery address").max(500),
   area: z.string().min(1, "Select delivery area"),
   notes: z.string().max(500).optional(),
-  payment: z.enum(["cod", "online"]),
+  payment: z.string().min(1, "Select a payment method"),
 });
 
 function Checkout() {
