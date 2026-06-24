@@ -190,6 +190,15 @@ function Home() {
       </section>
 
       <SiteFooter settings={settings} />
+
+      {openItem && (
+        <ItemDetailModal
+          item={openItem}
+          allItems={menu}
+          categories={cats}
+          onClose={() => setOpenItem(null)}
+        />
+      )}
     </div>
   );
 }
