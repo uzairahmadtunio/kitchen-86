@@ -29,6 +29,7 @@ export type Deal = {
 };
 export type DeliveryArea = { id: string; name: string; zone: string | null; charge: number; est_time: string | null; is_active: boolean };
 export type Review = { id: string; customer_name: string; rating: number; comment: string | null; created_at: string; is_approved: boolean; video_url: string | null };
+export type PaymentMethod = { id: string; code: string; label: string; description: string | null; instructions: string | null; account_title: string | null; account_number: string | null; icon: string | null; is_active: boolean; sort_order: number };
 
 const sb = supabase as any;
 
