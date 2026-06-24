@@ -150,6 +150,7 @@ export type Database = {
           is_active: boolean | null
           min_order: number | null
           name: string
+          zone: string | null
         }
         Insert: {
           charge?: number
@@ -158,6 +159,7 @@ export type Database = {
           is_active?: boolean | null
           min_order?: number | null
           name: string
+          zone?: string | null
         }
         Update: {
           charge?: number
@@ -166,6 +168,7 @@ export type Database = {
           is_active?: boolean | null
           min_order?: number | null
           name?: string
+          zone?: string | null
         }
         Relationships: []
       }
