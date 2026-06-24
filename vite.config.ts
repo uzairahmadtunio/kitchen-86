@@ -40,9 +40,8 @@ export default defineConfig({
               },
             },
             {
-              urlPattern: ({ url, request }) =>
-                url.origin === self.location.origin &&
-                ["style", "script", "worker", "font"].includes(request.destination),
+              urlPattern: ({ sameOrigin, request }: { sameOrigin: boolean; request: Request }) =>
+                sameOrigin && ["style", "script", "worker", "font"].includes(request.destination),
               handler: "CacheFirst",
               options: {
                 cacheName: "k86-assets",
