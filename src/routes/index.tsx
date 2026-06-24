@@ -122,7 +122,7 @@ function Home() {
           <h2 className="mt-2 text-4xl sm:text-5xl font-black">Fan <span className="fire-text">Favorites</span></h2>
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map((m) => <MenuCard key={m.id} item={m} />)}
+          {featured.map((m) => <MenuCard key={m.id} item={m} onOpen={setOpenItem} />)}
         </div>
         <div className="mt-10 text-center">
           <Link to="/menu" className="inline-flex items-center gap-2 rounded-xl fire-gradient px-6 py-3.5 text-sm font-black uppercase tracking-wider text-white">
