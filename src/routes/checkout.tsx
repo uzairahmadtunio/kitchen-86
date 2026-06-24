@@ -21,6 +21,7 @@ export const Route = createFileRoute("/checkout")({
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(settingsQO);
     context.queryClient.ensureQueryData(areasQO);
+    context.queryClient.ensureQueryData(paymentsQO);
   },
   component: Checkout,
 });
