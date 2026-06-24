@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CartProvider } from "../lib/cart-context";
 import { Toaster } from "sonner";
+import { WhatsAppFloat } from "../components/whatsapp-float";
 
 function NotFoundComponent() {
   return (
