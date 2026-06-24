@@ -20,13 +20,22 @@ type Tab = "dashboard" | "orders" | "menu" | "deals" | "areas" | "payments" | "s
 function AdminPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
-  const [tab, setTab] = useState<Tab>("orders");
+  const [tab, setTab] = useState<Tab>("dashboard");
   const [email, setEmail] = useState<string>("");
   const [newCount, setNewCount] = useState(0);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? ""));
   }, []);
+
+  // Fetch WhatsApp number once for auto-notify
+  const { data: waNumber } = useQuery({
+    queryKey: ["admin", "wa-number"],
+    queryFn: async () => {
+      const { data } = await sb.from("site_settings").select("value").eq("key", "whatsapp_number").maybeSingle();
+      return (data?.value ?? "").replace(/\D/g, "");
+    },
+  });
 
   // Realtime: listen for new orders site-wide while admin is open
   useEffect(() => {
@@ -37,12 +46,22 @@ function AdminPage() {
         playDing();
         flashTitle("🔔 NEW ORDER!");
         setNewCount((c) => c + 1);
-        toast.success(`🔥 New Order! ${o.order_number ?? ""} — ${o.customer_name ?? ""} — PKR ${o.total ?? ""}`, { duration: 8000 });
+        const msg = `🔥 New Order! ${o.order_number ?? ""} — ${o.customer_name ?? ""} — PKR ${o.total ?? ""}`;
+        const waText = encodeURIComponent(
+          `🔥 NEW ORDER ${o.order_number ?? ""}\nName: ${o.customer_name ?? ""}\nPhone: ${o.customer_phone ?? ""}\nArea: ${o.delivery_area ?? ""}\nAddress: ${o.address ?? ""}\nPayment: ${o.payment_method ?? ""}\nTotal: PKR ${o.total ?? ""}`
+        );
+        toast.success(msg, {
+          duration: 12000,
+          action: waNumber ? {
+            label: "Open WhatsApp",
+            onClick: () => window.open(`https://wa.me/${waNumber}?text=${waText}`, "_blank"),
+          } : undefined,
+        });
         qc.invalidateQueries({ queryKey: ["admin", "orders"] });
+        qc.invalidateQueries({ queryKey: ["admin", "dashboard"] });
       })
       .subscribe();
 
-    // Auto-refresh every 20s as fallback
     const poll = setInterval(() => {
       qc.invalidateQueries({ queryKey: ["admin", "orders"] });
     }, 20_000);
@@ -51,31 +70,33 @@ function AdminPage() {
       supabase.removeChannel(channel);
       clearInterval(poll);
     };
-  }, [qc]);
+  }, [qc, waNumber]);
 
   async function logout() {
     await supabase.auth.signOut();
     navigate({ to: "/auth" });
   }
 
-  const tabs: { key: Tab; label: string; icon: any }[] = [
-    { key: "orders", label: "Orders", icon: ShoppingBag },
-    { key: "menu", label: "Menu", icon: UtensilsCrossed },
-    { key: "deals", label: "Deals", icon: Tag },
-    { key: "areas", label: "Delivery Areas", icon: Truck },
-    { key: "payments", label: "Payments", icon: CreditCard },
-    { key: "reviews", label: "Reviews", icon: MessageSquare },
-    { key: "settings", label: "Settings", icon: SettingsIcon },
+  const tabs: { key: Tab; label: string; icon: any; emoji: string }[] = [
+    { key: "dashboard", label: "Dashboard", icon: LayoutDashboard, emoji: "📊" },
+    { key: "orders", label: "Orders", icon: ShoppingBag, emoji: "📦" },
+    { key: "menu", label: "Menu", icon: UtensilsCrossed, emoji: "🍔" },
+    { key: "deals", label: "Deals", icon: Tag, emoji: "🎯" },
+    { key: "areas", label: "Areas", icon: Truck, emoji: "🚚" },
+    { key: "payments", label: "Payments", icon: CreditCard, emoji: "💳" },
+    { key: "suggestions", label: "Suggestions", icon: Sparkles, emoji: "✨" },
+    { key: "reviews", label: "Reviews", icon: MessageSquare, emoji: "⭐" },
+    { key: "settings", label: "Settings", icon: SettingsIcon, emoji: "⚙️" },
   ];
 
   function selectTab(k: Tab) {
-    unlockAlertSound(); // unlock audio on first user gesture
+    unlockAlertSound();
     setTab(k);
     if (k === "orders") setNewCount(0);
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 md:pb-0">
       <header className="border-b border-border bg-[var(--secondary-bg)] sticky top-0 z-30">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
@@ -89,9 +110,9 @@ function AdminPage() {
             <LogOut className="h-3.5 w-3.5" /> Logout
           </button>
         </div>
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 flex gap-1 overflow-x-auto">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 hidden md:flex gap-1 overflow-x-auto">
           {tabs.map((t) => (
-            <button key={t.key} onClick={()=>selectTab(t.key)} className={`relative inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 -mb-px ${tab===t.key?"border-primary text-foreground":"border-transparent text-muted-foreground hover:text-foreground"}`}>
+            <button key={t.key} onClick={()=>selectTab(t.key)} className={`relative inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 -mb-px whitespace-nowrap ${tab===t.key?"border-primary text-foreground":"border-transparent text-muted-foreground hover:text-foreground"}`}>
               <t.icon className="h-4 w-4" /> {t.label}
               {t.key === "orders" && newCount > 0 && (
                 <span className="ml-1 grid place-items-center min-w-5 h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-black animate-pulse">{newCount}</span>
@@ -101,15 +122,126 @@ function AdminPage() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 py-6 sm:py-8">
+        {tab === "dashboard" && <DashboardTab />}
         {tab === "orders" && <OrdersTab />}
         {tab === "menu" && <MenuTab />}
         {tab === "deals" && <DealsTab />}
         {tab === "areas" && <AreasTab />}
         {tab === "payments" && <PaymentsTab />}
+        {tab === "suggestions" && <SuggestionsTab />}
         {tab === "reviews" && <ReviewsTab />}
         {tab === "settings" && <SettingsTab />}
       </main>
+
+      {/* Mobile bottom tab bar */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border bg-[var(--secondary-bg)] backdrop-blur">
+        <div className="flex overflow-x-auto no-scrollbar">
+          {tabs.map((t) => (
+            <button key={t.key} onClick={()=>selectTab(t.key)} className={`relative flex-1 min-w-[68px] min-h-[56px] flex flex-col items-center justify-center gap-0.5 py-1.5 text-[10px] font-bold ${tab===t.key?"text-primary":"text-muted-foreground"}`}>
+              <span className="text-lg leading-none">{t.emoji}</span>
+              <span className="leading-none">{t.label}</span>
+              {t.key === "orders" && newCount > 0 && (
+                <span className="absolute top-1 right-2 grid place-items-center min-w-4 h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-black animate-pulse">{newCount}</span>
+              )}
+            </button>
+          ))}
+        </div>
+      </nav>
+    </div>
+  );
+}
+
+/* -------- DASHBOARD -------- */
+function DashboardTab() {
+  const { data: orders = [], isLoading } = useQuery({
+    queryKey: ["admin", "dashboard"],
+    queryFn: async () => {
+      const since = new Date(); since.setDate(since.getDate() - 7);
+      const { data } = await sb.from("orders").select("*").gte("created_at", since.toISOString()).order("created_at", { ascending: false });
+      return data ?? [];
+    },
+  });
+  const { data: items = [] } = useQuery({
+    queryKey: ["admin", "dashboard-items"],
+    queryFn: async () => {
+      const since = new Date(); since.setDate(since.getDate() - 30);
+      const { data } = await sb.from("order_items").select("item_name, quantity, created_at").gte("created_at", since.toISOString());
+      return data ?? [];
+    },
+  });
+
+  const stats = useMemo(() => {
+    const today = new Date(); today.setHours(0,0,0,0);
+    const todayOrders = orders.filter((o: any) => new Date(o.created_at) >= today);
+    const days: { day: string; total: number; count: number }[] = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - i);
+      const next = new Date(d); next.setDate(next.getDate() + 1);
+      const dayOrders = orders.filter((o: any) => {
+        const t = new Date(o.created_at); return t >= d && t < next;
+      });
+      days.push({
+        day: d.toLocaleDateString(undefined, { weekday: "short" }),
+        total: dayOrders.reduce((s: number, o: any) => s + Number(o.total), 0),
+        count: dayOrders.length,
+      });
+    }
+    const topMap: Record<string, number> = {};
+    items.forEach((it: any) => { topMap[it.item_name] = (topMap[it.item_name] ?? 0) + Number(it.quantity || 1); });
+    const top = Object.entries(topMap).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    return {
+      todayCount: todayOrders.length,
+      todayRevenue: todayOrders.reduce((s: number, o: any) => s + Number(o.total), 0),
+      pending: orders.filter((o: any) => o.status === "new" || o.status === "preparing").length,
+      weekRevenue: orders.reduce((s: number, o: any) => s + Number(o.total), 0),
+      days, top,
+    };
+  }, [orders, items]);
+
+  const maxDay = Math.max(1, ...stats.days.map(d => d.total));
+
+  return (
+    <div>
+      <h2 className="text-2xl sm:text-3xl font-black mb-5">📊 Dashboard</h2>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        <Stat label="Today's Orders" value={String(stats.todayCount)} />
+        <Stat label="Today's Revenue" value={pkr(stats.todayRevenue)} accent />
+        <Stat label="Pending" value={String(stats.pending)} />
+        <Stat label="7-Day Revenue" value={pkr(stats.weekRevenue)} accent />
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-4">
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <div className="font-black mb-4">Last 7 Days</div>
+          {isLoading ? <div className="h-40 grid place-items-center text-muted-foreground text-sm">Loading...</div> : (
+            <div className="flex items-end gap-2 h-40">
+              {stats.days.map((d, i) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
+                  <div className="text-[10px] font-bold text-muted-foreground">{d.count}</div>
+                  <div className="w-full rounded-t-md fire-gradient transition-all" style={{ height: `${(d.total / maxDay) * 100}%`, minHeight: d.total > 0 ? "6px" : "2px" }} title={pkr(d.total)} />
+                  <div className="text-[10px] font-bold">{d.day}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="rounded-2xl border border-border bg-card p-5">
+          <div className="font-black mb-4">🔥 Top Items (30 days)</div>
+          {stats.top.length === 0 ? <div className="text-sm text-muted-foreground">No sales yet</div> : (
+            <ol className="space-y-2">
+              {stats.top.map(([name, qty], i) => (
+                <li key={name} className="flex items-center gap-3 text-sm">
+                  <span className="grid place-items-center h-7 w-7 rounded-full fire-gradient text-white text-xs font-black">{i+1}</span>
+                  <span className="flex-1 font-bold truncate">{name}</span>
+                  <span className="font-black text-[var(--gold)]">{qty} sold</span>
+                </li>
+              ))}
+            </ol>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
