@@ -8,6 +8,8 @@ import { AnnouncementBar } from "@/components/announcement-bar";
 import { MenuCard } from "@/components/menu-card";
 import { DealCard } from "@/components/deal-card";
 import { ItemDetailModal } from "@/components/item-detail-modal";
+import { GallerySection } from "@/components/gallery-section";
+import { ContactSection } from "@/components/contact-section";
 import type { MenuItem } from "@/lib/site-data";
 import { fetchSettings, fetchMenu, fetchDeals, fetchCategories, fetchApprovedReviews } from "@/lib/site-data";
 
