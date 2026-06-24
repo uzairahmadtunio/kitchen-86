@@ -65,3 +65,11 @@ export async function fetchPaymentMethods(): Promise<PaymentMethod[]> {
   const { data } = await sb.from("payment_methods").select("*").eq("is_active", true).order("sort_order");
   return (data ?? []) as PaymentMethod[];
 }
+export async function fetchPage(slug: string): Promise<Page | null> {
+  const { data } = await sb.from("pages").select("*").eq("slug", slug).eq("is_active", true).maybeSingle();
+  return (data ?? null) as Page | null;
+}
+export async function fetchTeam(): Promise<TeamMember[]> {
+  const { data } = await sb.from("team_members").select("*").eq("is_active", true).order("display_order");
+  return (data ?? []) as TeamMember[];
+}
