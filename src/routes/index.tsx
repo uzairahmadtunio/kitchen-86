@@ -1,11 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useState } from "react";
 import { Flame, Phone, MapPin, Clock, Star, ChevronRight } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AnnouncementBar } from "@/components/announcement-bar";
 import { MenuCard } from "@/components/menu-card";
 import { DealCard } from "@/components/deal-card";
+import { ItemDetailModal } from "@/components/item-detail-modal";
+import type { MenuItem } from "@/lib/site-data";
 import { fetchSettings, fetchMenu, fetchDeals, fetchCategories, fetchApprovedReviews } from "@/lib/site-data";
 
 const settingsQO = queryOptions({ queryKey: ["settings"], queryFn: fetchSettings });
