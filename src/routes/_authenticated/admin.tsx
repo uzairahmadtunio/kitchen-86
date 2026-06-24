@@ -873,6 +873,89 @@ function PaymentsTab() {
   );
 }
 
+/* -------- CART SUGGESTIONS -------- */
+function SuggestionsTab() {
+  const qc = useQueryClient();
+  const { data: items = [] } = useQuery({
+    queryKey: ["admin", "menu-min"],
+    queryFn: async () => { const { data } = await sb.from("menu_items").select("id,name").order("name"); return data ?? []; },
+  });
+  const { data: rows = [] } = useQuery({
+    queryKey: ["admin", "suggestions"],
+    queryFn: async () => { const { data } = await sb.from("cart_suggestions").select("*").order("display_order"); return data ?? []; },
+  });
+  const [editing, setEditing] = useState<any | null>(null);
+
+  async function save(r: any) {
+    if (!r.menu_item_id) return toast.error("Pick an item");
+    const { id, ...rest } = r;
+    const action = id ? sb.from("cart_suggestions").update(rest).eq("id", id) : sb.from("cart_suggestions").insert(rest);
+    const { error } = await action;
+    if (error) return toast.error(error.message);
+    toast.success("Saved"); setEditing(null);
+    qc.invalidateQueries({ queryKey: ["admin", "suggestions"] });
+    qc.invalidateQueries({ queryKey: ["cart-suggestions"] });
+  }
+  async function del(id: string) {
+    if (!confirm("Remove this suggestion?")) return;
+    await sb.from("cart_suggestions").delete().eq("id", id);
+    toast.success("Removed");
+    qc.invalidateQueries({ queryKey: ["admin", "suggestions"] });
+    qc.invalidateQueries({ queryKey: ["cart-suggestions"] });
+  }
+
+  return (
+    <div>
+      <div className="flex justify-between mb-5">
+        <div>
+          <h2 className="text-2xl font-black">✨ Cart Suggestions</h2>
+          <p className="text-sm text-muted-foreground mt-1">"Don't forget…" items shown on the cart page.</p>
+        </div>
+        <button onClick={()=>setEditing({ menu_item_id: items[0]?.id ?? "", label: "Don't forget!", display_order: rows.length, is_active: true })} className="inline-flex items-center gap-1 rounded-lg fire-gradient px-4 py-2 text-sm font-bold text-white"><Plus className="h-4 w-4" /> Add</button>
+      </div>
+      <div className="rounded-2xl border border-border bg-card divide-y divide-border">
+        {rows.length === 0 && <div className="p-8 text-center text-muted-foreground">No suggestions yet</div>}
+        {rows.map((r: any) => {
+          const item = items.find((i: any) => i.id === r.menu_item_id);
+          return (
+            <div key={r.id} className="flex items-center gap-3 px-5 py-3">
+              <div className="flex-1 min-w-0">
+                <div className="font-bold truncate">{item?.name ?? "(deleted item)"}</div>
+                <div className="text-xs text-muted-foreground">{r.label} · order {r.display_order}</div>
+              </div>
+              <span className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${r.is_active?"bg-[var(--success)]/15 text-[var(--success)]":"bg-muted text-muted-foreground"}`}>{r.is_active?"Active":"Hidden"}</span>
+              <button onClick={()=>setEditing(r)} className="rounded-lg border border-border px-2 py-1.5 text-xs font-bold hover:border-primary"><Pencil className="h-3 w-3" /></button>
+              <button onClick={()=>del(r.id)} className="rounded-lg border border-border px-2 py-1.5 text-xs font-bold text-destructive hover:border-destructive"><Trash2 className="h-3 w-3" /></button>
+            </div>
+          );
+        })}
+      </div>
+
+      {editing && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur grid place-items-center p-4" onClick={()=>setEditing(null)}>
+          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6" onClick={(e)=>e.stopPropagation()}>
+            <h3 className="text-xl font-black mb-4">{editing.id?"Edit":"New"} Suggestion</h3>
+            <div className="space-y-3">
+              <FormField label="Menu Item">
+                <select className={ic} value={editing.menu_item_id ?? ""} onChange={(e)=>setEditing({...editing, menu_item_id: e.target.value})}>
+                  {items.map((i: any)=>(<option key={i.id} value={i.id}>{i.name}</option>))}
+                </select>
+              </FormField>
+              <FormField label="Label"><input className={ic} value={editing.label ?? ""} onChange={(e)=>setEditing({...editing, label: e.target.value})} placeholder="Don't forget the drink!" /></FormField>
+              <FormField label="Display Order"><input type="number" className={ic} value={editing.display_order ?? 0} onChange={(e)=>setEditing({...editing, display_order: Number(e.target.value)})} /></FormField>
+              <Toggle label="Active" v={editing.is_active} onChange={(v)=>setEditing({...editing, is_active: v})} />
+            </div>
+            <div className="mt-5 flex gap-2 justify-end">
+              <button onClick={()=>setEditing(null)} className="rounded-lg border border-border px-4 py-2 text-sm font-bold">Cancel</button>
+              <button onClick={()=>save(editing)} className="rounded-lg fire-gradient px-4 py-2 text-sm font-bold text-white">Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* helpers */
 const ic = "w-full rounded-lg border border-border bg-[var(--secondary-bg)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]";
 function FormField({ label, children }: { label: string; children: React.ReactNode }) {
