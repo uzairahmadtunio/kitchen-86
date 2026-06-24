@@ -13,6 +13,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CartProvider } from "../lib/cart-context";
 import { Toaster } from "sonner";
 import { WhatsAppFloat } from "../components/whatsapp-float";
+import { registerPWA } from "../lib/pwa-register";
 
 function NotFoundComponent() {
   return (
@@ -48,10 +49,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { title: "Kitchen 86 — Always Fresh, Taste The Best | Larkana" },
       { name: "description", content: "Larkana's hottest fast food spot. Signature Zinger 86, Cheezious Matka Fries & handcrafted burgers. Order online for fast delivery in Larkana." },
-      { name: "theme-color", content: "#0A0A0A" },
+      { name: "theme-color", content: "#FF4500" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
+      { name: "apple-mobile-web-app-title", content: "Kitchen 86" },
+      { name: "mobile-web-app-capable", content: "yes" },
       { property: "og:title", content: "Kitchen 86 — Always Fresh, Taste The Best" },
       { property: "og:description", content: "Unique styled fried chicken, Matka Fries & burgers in Larkana." },
       { property: "og:type", content: "website" },
@@ -59,6 +64,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     ],
     links: [
       { rel: "stylesheet", href: appCss },
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/icons/apple-touch-icon.png" },
+      { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },
+      { rel: "icon", type: "image/png", sizes: "192x192", href: "/icons/icon-192.png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" },
