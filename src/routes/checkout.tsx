@@ -6,6 +6,7 @@ import { z } from "zod";
 import { ChevronRight } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { PaymentScreenshotUpload } from "@/components/payment-screenshot-upload";
 import { useCart } from "@/lib/cart-context";
 import { pkr } from "@/lib/format";
 import { fetchSettings, fetchAreas, fetchPaymentMethods } from "@/lib/site-data";
@@ -44,8 +45,10 @@ function Checkout() {
 
   const defaultPayment = paymentMethods[0]?.code ?? "cod";
   const [form, setForm] = useState({ name: "", phone: "", address: "", area: "", customArea: "", notes: "", payment: defaultPayment });
+  const [screenshotUrl, setScreenshotUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const selectedPayment = paymentMethods.find((p) => p.code === form.payment);
+  const isOnlinePayment = !!selectedPayment && selectedPayment.code !== "cod";
 
   const selectedArea = areas.find((a) => a.id === form.area);
   const isCustom = (selectedArea?.zone ?? "").toLowerCase() === "custom";
@@ -91,6 +94,7 @@ function Checkout() {
         address: form.address,
         notes: composedNotes,
         payment_method: form.payment,
+        payment_screenshot_url: screenshotUrl || null,
         subtotal,
         total,
       }).select().single();
