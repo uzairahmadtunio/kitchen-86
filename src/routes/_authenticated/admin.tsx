@@ -486,6 +486,111 @@ function SettingsTab() {
   );
 }
 
+/* -------- DELIVERY AREAS -------- */
+function AreasTab() {
+  const qc = useQueryClient();
+  const { data: areas = [] } = useQuery({
+    queryKey: ["admin", "areas"],
+    queryFn: async () => {
+      const { data } = await sb.from("delivery_areas").select("*").order("zone").order("name");
+      return data ?? [];
+    },
+  });
+  const [editing, setEditing] = useState<any | null>(null);
+
+  async function save(a: any) {
+    if (!a.name?.trim()) return toast.error("Area name required");
+    const { id, ...rest } = a;
+    rest.charge = Number(rest.charge) || 0;
+    const action = id ? sb.from("delivery_areas").update(rest).eq("id", id) : sb.from("delivery_areas").insert(rest);
+    const { error } = await action;
+    if (error) return toast.error(error.message);
+    toast.success("Saved");
+    setEditing(null);
+    qc.invalidateQueries({ queryKey: ["admin", "areas"] });
+    qc.invalidateQueries({ queryKey: ["areas"] });
+  }
+  async function toggleActive(a: any) {
+    const { error } = await sb.from("delivery_areas").update({ is_active: !a.is_active }).eq("id", a.id);
+    if (error) return toast.error(error.message);
+    qc.invalidateQueries({ queryKey: ["admin", "areas"] });
+    qc.invalidateQueries({ queryKey: ["areas"] });
+  }
+  async function del(id: string) {
+    if (!confirm("Delete this delivery area?")) return;
+    const { error } = await sb.from("delivery_areas").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Deleted");
+    qc.invalidateQueries({ queryKey: ["admin", "areas"] });
+    qc.invalidateQueries({ queryKey: ["areas"] });
+  }
+
+  return (
+    <div>
+      <div className="flex justify-between mb-5">
+        <div>
+          <h2 className="text-2xl font-black">Delivery Areas</h2>
+          <p className="text-sm text-muted-foreground mt-1">Changes reflect instantly on the checkout page.</p>
+        </div>
+        <button onClick={() => setEditing({ name: "", zone: "A", charge: 50, est_time: "20-30 mins", is_active: true })} className="inline-flex items-center gap-1 rounded-lg fire-gradient px-4 py-2 text-sm font-bold text-white"><Plus className="h-4 w-4" /> Add Area</button>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card overflow-hidden">
+        <div className="grid grid-cols-[1fr_70px_100px_140px_90px_120px] gap-2 px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border">
+          <div>Area Name</div><div>Zone</div><div>Charge</div><div>Est. Time</div><div>Active</div><div className="text-right">Actions</div>
+        </div>
+        {areas.length === 0 && <div className="p-8 text-center text-muted-foreground">No delivery areas yet</div>}
+        {areas.map((a: any) => (
+          <div key={a.id} className="grid grid-cols-[1fr_70px_100px_140px_90px_120px] gap-2 px-5 py-3 items-center border-b border-border/60 last:border-0 text-sm">
+            <div className="font-bold">{a.name}</div>
+            <div><span className="inline-flex rounded-full bg-[var(--secondary-bg)] border border-border px-2 py-0.5 text-[11px] font-black">{a.zone ?? "—"}</span></div>
+            <div className="font-black text-[var(--gold)]">{pkr(a.charge)}</div>
+            <div className="text-xs text-muted-foreground">{a.est_time ?? "—"}</div>
+            <div>
+              <button onClick={() => toggleActive(a)} className={`rounded-full w-10 h-5 relative transition ${a.is_active ? "bg-[var(--success)]" : "bg-muted"}`}>
+                <span className={`absolute top-0.5 ${a.is_active ? "right-0.5" : "left-0.5"} h-4 w-4 rounded-full bg-white transition`}></span>
+              </button>
+            </div>
+            <div className="flex justify-end gap-1">
+              <button onClick={() => setEditing(a)} className="rounded-lg border border-border px-2 py-1.5 text-xs font-bold hover:border-primary"><Pencil className="h-3 w-3" /></button>
+              <button onClick={() => del(a.id)} className="rounded-lg border border-border px-2 py-1.5 text-xs font-bold text-destructive hover:border-destructive"><Trash2 className="h-3 w-3" /></button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {editing && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur grid place-items-center p-4" onClick={() => setEditing(null)}>
+          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-xl font-black mb-4">{editing.id ? "Edit" : "New"} Delivery Area</h3>
+            <div className="space-y-3">
+              <FormField label="Area Name"><input className={ic} value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} placeholder="e.g. Civil Lines" /></FormField>
+              <div className="grid grid-cols-2 gap-3">
+                <FormField label="Zone">
+                  <select className={ic} value={editing.zone ?? ""} onChange={(e) => setEditing({ ...editing, zone: e.target.value })}>
+                    <option value="A">Zone A</option>
+                    <option value="B">Zone B</option>
+                    <option value="C">Zone C</option>
+                    <option value="D">Zone D</option>
+                    <option value="Custom">Custom</option>
+                  </select>
+                </FormField>
+                <FormField label="Charge (PKR)"><input type="number" className={ic} value={editing.charge} onChange={(e) => setEditing({ ...editing, charge: Number(e.target.value) })} /></FormField>
+              </div>
+              <FormField label="Estimated Time"><input className={ic} value={editing.est_time ?? ""} onChange={(e) => setEditing({ ...editing, est_time: e.target.value })} placeholder="e.g. 20-30 mins" /></FormField>
+              <Toggle label="Active" v={editing.is_active} onChange={(v) => setEditing({ ...editing, is_active: v })} />
+            </div>
+            <div className="mt-5 flex gap-2 justify-end">
+              <button onClick={() => setEditing(null)} className="rounded-lg border border-border px-4 py-2 text-sm font-bold">Cancel</button>
+              <button onClick={() => save(editing)} className="rounded-lg fire-gradient px-4 py-2 text-sm font-bold text-white">Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* helpers */
 const ic = "w-full rounded-lg border border-border bg-[var(--secondary-bg)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--ring)]";
 function FormField({ label, children }: { label: string; children: React.ReactNode }) {
