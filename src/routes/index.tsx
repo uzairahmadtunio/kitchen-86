@@ -117,11 +117,11 @@ function Home() {
 
       {/* FEATURED */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <div className="text-xs uppercase tracking-[0.25em] text-primary font-bold">Bestsellers</div>
-          <h2 className="mt-2 text-4xl sm:text-5xl font-black">Fan <span className="fire-text">Favorites</span></h2>
+          <h2 className="mt-2 text-3xl sm:text-5xl font-black">Fan <span className="fire-text">Favorites</span></h2>
         </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:gap-5 grid-cols-2 lg:grid-cols-3">
           {featured.map((m) => <MenuCard key={m.id} item={m} onOpen={setOpenItem} />)}
         </div>
         <div className="mt-10 text-center">
