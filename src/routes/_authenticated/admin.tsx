@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Flame, LogOut, ShoppingBag, UtensilsCrossed, Tag, MessageSquare, Settings as SettingsIcon, Star, Trash2, Pencil, Plus, Check, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { pkr } from "@/lib/format";
+import { MediaUpload } from "@/components/media-upload";
 
 const sb = supabase as any;
 
@@ -257,7 +258,7 @@ function ItemEditor({ cats, item, onClose, onSave }: any) {
               {cats.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </FormField>
-          <FormField label="Image URL"><input className={ic} value={f.image_url ?? ""} onChange={(e)=>setF({...f,image_url:e.target.value})}/></FormField>
+          <FormField label="Image"><MediaUpload value={f.image_url ?? ""} onChange={(v)=>setF({...f,image_url:v})} folder="menu" /></FormField>
           <div className="flex flex-wrap gap-4 text-sm">
             <Toggle label="Bestseller" v={f.is_bestseller} onChange={(v)=>setF({...f,is_bestseller:v})} />
             <Toggle label="Featured" v={f.is_featured} onChange={(v)=>setF({...f,is_featured:v})} />
@@ -330,7 +331,7 @@ function DealsTab() {
                 <FormField label="Original Price"><input type="number" className={ic} value={editing.original_price ?? ""} onChange={(e)=>setEditing({...editing,original_price:Number(e.target.value)})}/></FormField>
               </div>
               <FormField label="Badge"><input className={ic} value={editing.badge_text ?? ""} onChange={(e)=>setEditing({...editing,badge_text:e.target.value})}/></FormField>
-              <FormField label="Image URL"><input className={ic} value={editing.image_url ?? ""} onChange={(e)=>setEditing({...editing,image_url:e.target.value})}/></FormField>
+              <FormField label="Image"><MediaUpload value={editing.image_url ?? ""} onChange={(v)=>setEditing({...editing,image_url:v})} folder="deals" /></FormField>
               <Toggle label="Active" v={editing.is_active} onChange={(v)=>setEditing({...editing,is_active:v})} />
             </div>
             <div className="mt-5 flex gap-2 justify-end">
