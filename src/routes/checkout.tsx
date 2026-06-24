@@ -234,6 +234,15 @@ function Checkout() {
                   {selectedPayment.instructions && <div className="text-foreground">{selectedPayment.instructions}</div>}
                   {selectedPayment.account_title && <div><span className="text-muted-foreground">Account Title:</span> <b>{selectedPayment.account_title}</b></div>}
                   {selectedPayment.account_number && <div><span className="text-muted-foreground">Account #:</span> <b className="font-mono text-[var(--gold)]">{selectedPayment.account_number}</b></div>}
+                  <div className="pt-1 text-foreground">📱 Send <b className="text-[var(--gold)]">PKR {total}</b> to <b className="font-mono">{selectedPayment.account_number}</b></div>
+                </div>
+              )}
+              {isOnlinePayment && (
+                <div className="mt-3 space-y-2">
+                  <PaymentScreenshotUpload value={screenshotUrl} onChange={setScreenshotUrl} />
+                  <div className="text-[11px] text-muted-foreground leading-relaxed">
+                    💡 Screenshot zaroori nahi — order place karein, phir WhatsApp pe bhej dein.
+                  </div>
                 </div>
               )}
             </Card>
