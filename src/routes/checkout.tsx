@@ -39,12 +39,26 @@ function Checkout() {
   const { items, subtotal, clear } = useCart();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({ name: "", phone: "", address: "", area: "", notes: "", payment: "cod" as "cod" | "online" });
+  const [form, setForm] = useState({ name: "", phone: "", address: "", area: "", customArea: "", notes: "", payment: "cod" as "cod" | "online" });
   const [submitting, setSubmitting] = useState(false);
 
   const selectedArea = areas.find((a) => a.id === form.area);
+  const isCustom = (selectedArea?.zone ?? "").toLowerCase() === "custom";
   const deliveryCharge = Number(selectedArea?.charge ?? 0);
   const total = subtotal + deliveryCharge;
+
+  const grouped = areas.reduce<Record<string, typeof areas>>((acc, a) => {
+    const z = (a.zone ?? "Other").toUpperCase();
+    (acc[z] = acc[z] ?? []).push(a);
+    return acc;
+  }, {});
+  const zoneOrder = ["A", "B", "C", "D", "CUSTOM", "OTHER"];
+  const zoneKeys = Object.keys(grouped).sort((a, b) => {
+    const ai = zoneOrder.indexOf(a); const bi = zoneOrder.indexOf(b);
+    return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
+  });
+  const zoneLabel = (z: string) =>
+    z === "CUSTOM" ? "Other / Custom" : z === "OTHER" ? "Other" : `Zone ${z}`;
 
   async function placeOrder() {
     const parsed = schema.safeParse(form);
