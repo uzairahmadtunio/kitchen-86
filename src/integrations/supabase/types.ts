@@ -323,6 +323,33 @@ export type Database = {
         }
         Relationships: []
       }
+      pages: {
+        Row: {
+          content: string
+          id: string
+          is_active: boolean
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          id?: string
+          is_active?: boolean
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          id?: string
+          is_active?: boolean
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payment_methods: {
         Row: {
           account_number: string | null
@@ -413,6 +440,39 @@ export type Database = {
           id?: string
           key?: string
           value?: string | null
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          bio: string
+          created_at: string
+          display_order: number
+          id: string
+          image_url: string | null
+          is_active: boolean
+          name: string
+          role: string
+        }
+        Insert: {
+          bio?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name: string
+          role?: string
+        }
+        Update: {
+          bio?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          name?: string
+          role?: string
         }
         Relationships: []
       }

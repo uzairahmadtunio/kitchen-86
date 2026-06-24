@@ -23,8 +23,8 @@ export function SiteFooter({ settings }: { settings: Record<string, string> }) {
             <li><Link to="/menu" className="text-muted-foreground hover:text-foreground">Menu</Link></li>
             <li><a href="/#deals" className="text-muted-foreground hover:text-foreground">Deals</a></li>
             <li><Link to="/track" className="text-muted-foreground hover:text-foreground">Track Order</Link></li>
-            <li><a href="/#about" className="text-muted-foreground hover:text-foreground">About</a></li>
-            <li><a href="/#contact" className="text-muted-foreground hover:text-foreground">Contact</a></li>
+            <li><Link to="/about" className="text-muted-foreground hover:text-foreground">About Us</Link></li>
+            <li><Link to="/contact" className="text-muted-foreground hover:text-foreground">Contact Us</Link></li>
           </ul>
         </div>
 
@@ -42,9 +42,20 @@ export function SiteFooter({ settings }: { settings: Record<string, string> }) {
           )}
         </div>
       </div>
-      <div className="border-t border-border py-5 text-center text-xs text-muted-foreground space-y-1">
-        <div>© {new Date().getFullYear()} Kitchen 86. All Rights Reserved.</div>
-        <div>Developed by <span className="text-[var(--gold)] font-bold">Uzair Ahmad</span></div>
+      <div className="border-t border-border py-5">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+          <div>© {new Date().getFullYear()} Kitchen 86. All Rights Reserved.</div>
+          <div className="flex items-center gap-4">
+            <Link to="/privacy-policy" className="hover:text-foreground">Privacy Policy</Link>
+            <span className="text-border">|</span>
+            <Link to="/about" className="hover:text-foreground">About Us</Link>
+            <span className="text-border">|</span>
+            <Link to="/contact" className="hover:text-foreground">Contact Us</Link>
+          </div>
+        </div>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 mt-3 text-center text-[11px] text-muted-foreground">
+          Developed by <span className="text-[var(--gold)] font-bold">Uzair Ahmad</span> · SE Student, University of Larkana
+        </div>
       </div>
     </footer>
   );

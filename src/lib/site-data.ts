@@ -30,6 +30,8 @@ export type Deal = {
 export type DeliveryArea = { id: string; name: string; zone: string | null; charge: number; est_time: string | null; is_active: boolean };
 export type Review = { id: string; customer_name: string; rating: number; comment: string | null; created_at: string; is_approved: boolean; video_url: string | null };
 export type PaymentMethod = { id: string; code: string; label: string; description: string | null; instructions: string | null; account_title: string | null; account_number: string | null; icon: string | null; is_active: boolean; sort_order: number };
+export type Page = { id: string; slug: string; title: string; content: string; is_active: boolean; updated_at: string };
+export type TeamMember = { id: string; name: string; role: string; bio: string; image_url: string | null; display_order: number; is_active: boolean };
 
 const sb = supabase as any;
 
@@ -62,4 +64,12 @@ export async function fetchApprovedReviews(): Promise<Review[]> {
 export async function fetchPaymentMethods(): Promise<PaymentMethod[]> {
   const { data } = await sb.from("payment_methods").select("*").eq("is_active", true).order("sort_order");
   return (data ?? []) as PaymentMethod[];
+}
+export async function fetchPage(slug: string): Promise<Page | null> {
+  const { data } = await sb.from("pages").select("*").eq("slug", slug).eq("is_active", true).maybeSingle();
+  return (data ?? null) as Page | null;
+}
+export async function fetchTeam(): Promise<TeamMember[]> {
+  const { data } = await sb.from("team_members").select("*").eq("is_active", true).order("display_order");
+  return (data ?? []) as TeamMember[];
 }
