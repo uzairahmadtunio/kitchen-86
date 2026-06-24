@@ -133,6 +133,8 @@ function AdminPage() {
         {tab === "payments" && <PaymentsTab />}
         {tab === "suggestions" && <SuggestionsTab />}
         {tab === "reviews" && <ReviewsTab />}
+        {tab === "pages" && <PagesTab />}
+        {tab === "team" && <TeamTab />}
         {tab === "settings" && <SettingsTab />}
       </main>
 
