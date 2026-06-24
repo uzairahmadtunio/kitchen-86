@@ -12,14 +12,15 @@ export function WhatsAppFloat() {
       target="_blank"
       rel="noreferrer"
       aria-label="Order via WhatsApp"
-      className="group fixed bottom-5 right-5 z-40 grid h-14 w-14 place-items-center rounded-full bg-[#22C55E] text-white shadow-2xl shadow-[#22C55E]/40 hover:scale-110 transition-transform"
+      className="group fixed bottom-6 right-6 z-40 grid h-14 w-14 place-items-center rounded-full bg-[#25D366] text-white shadow-xl shadow-[#25D366]/40 hover:scale-110 transition-transform"
     >
-      <span className="absolute inset-0 rounded-full bg-[#22C55E] animate-ping opacity-40 pointer-events-none" />
-      <svg viewBox="0 0 24 24" className="relative h-7 w-7 fill-current" aria-hidden="true">
-        <path d="M20.52 3.48A11.93 11.93 0 0 0 12.06 0C5.5 0 .17 5.33.17 11.89c0 2.09.55 4.13 1.59 5.93L0 24l6.32-1.66a11.86 11.86 0 0 0 5.73 1.46h.01c6.55 0 11.89-5.34 11.89-11.9 0-3.18-1.24-6.16-3.43-8.42ZM12.06 21.4h-.01a9.5 9.5 0 0 1-4.84-1.33l-.35-.21-3.75.98 1-3.65-.23-.37a9.5 9.5 0 0 1-1.46-5.05c0-5.25 4.27-9.52 9.53-9.52 2.54 0 4.94 1 6.74 2.8a9.45 9.45 0 0 1 2.79 6.73c0 5.26-4.27 9.62-9.42 9.62Zm5.44-7.13c-.3-.15-1.76-.87-2.04-.97-.27-.1-.47-.15-.67.15s-.77.97-.94 1.17c-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.39-1.47-.88-.78-1.48-1.75-1.65-2.05-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51l-.57-.01c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.22 3.07.15.2 2.1 3.21 5.08 4.5.71.3 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.42.25-.7.25-1.29.17-1.42-.07-.13-.27-.2-.57-.35Z"/>
+      <span className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-30 pointer-events-none" />
+      <span className="absolute -inset-1 rounded-full ring-2 ring-[#25D366]/40 pointer-events-none" />
+      <svg viewBox="0 0 24 24" fill="white" className="relative h-7 w-7" aria-hidden="true">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
       </svg>
-      <span className="absolute right-16 whitespace-nowrap rounded-lg bg-foreground text-background px-3 py-1.5 text-xs font-bold opacity-0 group-hover:opacity-100 transition pointer-events-none">
-        Order via WhatsApp 🍔
+      <span className="absolute right-[calc(100%+12px)] top-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-[#1A1A1A] text-white px-3 py-1.5 text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-[#2A2A2A]">
+        Order via WhatsApp
       </span>
     </a>
   );
