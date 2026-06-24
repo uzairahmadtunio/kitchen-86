@@ -30,6 +30,8 @@ export type Deal = {
 export type DeliveryArea = { id: string; name: string; zone: string | null; charge: number; est_time: string | null; is_active: boolean };
 export type Review = { id: string; customer_name: string; rating: number; comment: string | null; created_at: string; is_approved: boolean; video_url: string | null };
 export type PaymentMethod = { id: string; code: string; label: string; description: string | null; instructions: string | null; account_title: string | null; account_number: string | null; icon: string | null; is_active: boolean; sort_order: number };
+export type Page = { id: string; slug: string; title: string; content: string; is_active: boolean; updated_at: string };
+export type TeamMember = { id: string; name: string; role: string; bio: string; image_url: string | null; display_order: number; is_active: boolean };
 
 const sb = supabase as any;
 
