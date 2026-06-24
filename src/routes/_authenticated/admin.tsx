@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Flame, LogOut, ShoppingBag, UtensilsCrossed, Tag, MessageSquare, Settings as SettingsIcon, Star, Trash2, Pencil, Plus, Check, X } from "lucide-react";
+import { Flame, LogOut, ShoppingBag, UtensilsCrossed, Tag, MessageSquare, Settings as SettingsIcon, Star, Trash2, Pencil, Plus, Check, X, Truck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { pkr } from "@/lib/format";
 import { MediaUpload } from "@/components/media-upload";
@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
 });
 
-type Tab = "orders" | "menu" | "deals" | "reviews" | "settings";
+type Tab = "orders" | "menu" | "deals" | "areas" | "reviews" | "settings";
 
 function AdminPage() {
   const navigate = useNavigate();
@@ -34,6 +34,7 @@ function AdminPage() {
     { key: "orders", label: "Orders", icon: ShoppingBag },
     { key: "menu", label: "Menu", icon: UtensilsCrossed },
     { key: "deals", label: "Deals", icon: Tag },
+    { key: "areas", label: "Delivery Areas", icon: Truck },
     { key: "reviews", label: "Reviews", icon: MessageSquare },
     { key: "settings", label: "Settings", icon: SettingsIcon },
   ];
@@ -66,6 +67,7 @@ function AdminPage() {
         {tab === "orders" && <OrdersTab />}
         {tab === "menu" && <MenuTab />}
         {tab === "deals" && <DealsTab />}
+        {tab === "areas" && <AreasTab />}
         {tab === "reviews" && <ReviewsTab />}
         {tab === "settings" && <SettingsTab />}
       </main>
