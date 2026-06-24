@@ -194,6 +194,9 @@ function Home() {
         </div>
       </section>
 
+      {/* CONTACT */}
+      <ContactSection settings={settings} />
+
       <SiteFooter settings={settings} />
 
       {openItem && (
