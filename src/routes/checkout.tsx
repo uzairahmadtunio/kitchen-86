@@ -3,7 +3,7 @@ import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Copy, Check } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PaymentScreenshotUpload } from "@/components/payment-screenshot-upload";
@@ -230,11 +230,19 @@ function Checkout() {
                 </div>
               )}
               {selectedPayment && (selectedPayment.instructions || selectedPayment.account_number) && (
-                <div className="mt-3 rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2.5 text-xs space-y-1">
+                <div className="mt-3 rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2.5 text-xs space-y-1.5">
                   {selectedPayment.instructions && <div className="text-foreground">{selectedPayment.instructions}</div>}
                   {selectedPayment.account_title && <div><span className="text-muted-foreground">Account Title:</span> <b>{selectedPayment.account_title}</b></div>}
-                  {selectedPayment.account_number && <div><span className="text-muted-foreground">Account #:</span> <b className="font-mono text-[var(--gold)]">{selectedPayment.account_number}</b></div>}
-                  <div className="pt-1 text-foreground">📱 Send <b className="text-[var(--gold)]">PKR {total}</b> to <b className="font-mono">{selectedPayment.account_number}</b></div>
+                  {selectedPayment.account_number && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-muted-foreground">Account #:</span>
+                      <CopyChip value={selectedPayment.account_number} />
+                    </div>
+                  )}
+                  <div className="pt-1 text-foreground flex items-center gap-2 flex-wrap">
+                    <span>📱 Send <b className="text-[var(--gold)]">PKR {total}</b> to</span>
+                    {selectedPayment.account_number && <CopyChip value={selectedPayment.account_number} />}
+                  </div>
                 </div>
               )}
               {isOnlinePayment && (
@@ -286,4 +294,32 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 function Row({ label, value }: { label: string; value: string }) {
   return <div className="flex justify-between"><span className="text-muted-foreground">{label}</span><span className="font-bold">{value}</span></div>;
+}
+
+function CopyChip({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false);
+  async function doCopy() {
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = value; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); } catch {}
+      document.body.removeChild(ta);
+    }
+    setCopied(true);
+    toast.success("📋 Copied " + value);
+    setTimeout(() => setCopied(false), 1500);
+  }
+  return (
+    <button
+      type="button"
+      onClick={doCopy}
+      className={`inline-flex items-center gap-1.5 rounded-md border border-[var(--gold)]/50 bg-black/30 px-2 py-1 font-mono text-[var(--gold)] hover:bg-black/50 active:scale-95 transition ${copied ? "animate-copy-flash" : ""}`}
+      aria-label={`Copy ${value}`}
+    >
+      <span className="font-bold">{value}</span>
+      {copied ? <Check className="h-3.5 w-3.5 text-[var(--success)]" /> : <Copy className="h-3.5 w-3.5 opacity-80" />}
+    </button>
+  );
 }
