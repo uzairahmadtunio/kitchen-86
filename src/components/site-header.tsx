@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingBag, Menu as MenuIcon, X, Flame } from "lucide-react";
+import { ShoppingBag, Menu as MenuIcon, X, Flame, Package } from "lucide-react";
 import { useState } from "react";
 import { useCart } from "@/lib/cart-context";
+import { OrderTrackingBanner } from "@/components/order-tracking-banner";
 
 export function SiteHeader() {
   const { count } = useCart();
@@ -9,12 +10,13 @@ export function SiteHeader() {
   const links = [
     { to: "/", label: "Home" },
     { to: "/menu", label: "Menu" },
+    { to: "/track", label: "Track Order" },
     { to: "/#deals", label: "Deals" },
     { to: "/#about", label: "About" },
-    { to: "/#contact", label: "Contact" },
   ];
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-xl">
+      <OrderTrackingBanner />
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         <Link to="/" className="flex items-center gap-2 group">
           <span className="grid h-10 w-10 place-items-center rounded-lg fire-gradient">
@@ -33,6 +35,9 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <Link to="/track" className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-xs font-bold hover:border-primary">
+            <Package className="h-3.5 w-3.5" /> Track
+          </Link>
           <Link to="/cart" className="relative inline-flex items-center gap-2 rounded-lg fire-gradient px-4 py-2 text-sm font-bold text-white glow-orange transition-transform hover:scale-105">
             <ShoppingBag className="h-4 w-4" />
             <span className="hidden sm:inline">Cart</span>

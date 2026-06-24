@@ -155,12 +155,17 @@ function Home() {
         </div>
         <div className="grid gap-5 md:grid-cols-3">
           {reviews.slice(0, 6).map((r) => (
-            <div key={r.id} className="rounded-2xl border border-border bg-card p-6">
-              <div className="flex gap-1 text-[var(--gold)] mb-3">
-                {Array.from({ length: r.rating }).map((_, i) => <Star key={i} className="h-4 w-4 fill-current" />)}
+            <div key={r.id} className="rounded-2xl border border-border bg-card overflow-hidden">
+              {r.video_url && (
+                <video src={r.video_url} controls playsInline className="w-full aspect-video object-cover bg-black" />
+              )}
+              <div className="p-6">
+                <div className="flex gap-1 text-[var(--gold)] mb-3">
+                  {Array.from({ length: r.rating }).map((_, i) => <Star key={i} className="h-4 w-4 fill-current" />)}
+                </div>
+                {r.comment && <p className="text-sm text-foreground leading-relaxed">"{r.comment}"</p>}
+                <div className="mt-4 text-xs font-bold text-muted-foreground">— {r.customer_name}</div>
               </div>
-              <p className="text-sm text-foreground leading-relaxed">"{r.comment}"</p>
-              <div className="mt-4 text-xs font-bold text-muted-foreground">— {r.customer_name}</div>
             </div>
           ))}
         </div>

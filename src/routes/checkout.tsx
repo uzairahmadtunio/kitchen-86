@@ -10,6 +10,7 @@ import { useCart } from "@/lib/cart-context";
 import { pkr } from "@/lib/format";
 import { fetchSettings, fetchAreas } from "@/lib/site-data";
 import { supabase } from "@/integrations/supabase/client";
+import { saveLastOrder } from "@/lib/last-order";
 
 const settingsQO = queryOptions({ queryKey: ["settings"], queryFn: fetchSettings });
 const areasQO = queryOptions({ queryKey: ["areas"], queryFn: fetchAreas });
@@ -77,6 +78,7 @@ function Checkout() {
       if (e2) throw e2;
 
       clear();
+      saveLastOrder({ order_number: order.order_number, phone: form.phone, placed_at: Date.now() });
       toast.success("Order placed! 🔥");
       navigate({ to: "/order-success", search: { o: order.order_number } });
     } catch (e: any) {
