@@ -34,6 +34,7 @@ function Home() {
   const { data: deals } = useSuspenseQuery(dealsQO);
   const { data: cats } = useSuspenseQuery(catsQO);
   const { data: reviews } = useSuspenseQuery(reviewsQO);
+  const [openItem, setOpenItem] = useState<MenuItem | null>(null);
 
   const featured = menu.filter((m) => m.is_featured || m.is_bestseller).slice(0, 6);
   const waUrl = `https://wa.me/${(settings.whatsapp ?? "").replace(/\D/g, "")}`;
