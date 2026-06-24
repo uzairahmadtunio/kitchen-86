@@ -6,6 +6,7 @@ import { z } from "zod";
 import { ChevronRight } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { PaymentScreenshotUpload } from "@/components/payment-screenshot-upload";
 import { useCart } from "@/lib/cart-context";
 import { pkr } from "@/lib/format";
 import { fetchSettings, fetchAreas, fetchPaymentMethods } from "@/lib/site-data";
@@ -44,8 +45,10 @@ function Checkout() {
 
   const defaultPayment = paymentMethods[0]?.code ?? "cod";
   const [form, setForm] = useState({ name: "", phone: "", address: "", area: "", customArea: "", notes: "", payment: defaultPayment });
+  const [screenshotUrl, setScreenshotUrl] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const selectedPayment = paymentMethods.find((p) => p.code === form.payment);
+  const isOnlinePayment = !!selectedPayment && selectedPayment.code !== "cod";
 
   const selectedArea = areas.find((a) => a.id === form.area);
   const isCustom = (selectedArea?.zone ?? "").toLowerCase() === "custom";
@@ -91,6 +94,7 @@ function Checkout() {
         address: form.address,
         notes: composedNotes,
         payment_method: form.payment,
+        payment_screenshot_url: screenshotUrl || null,
         subtotal,
         total,
       }).select().single();
@@ -138,7 +142,7 @@ function Checkout() {
       } catch {}
 
       toast.success("Order placed! 🔥");
-      navigate({ to: "/order-success", search: { o: order.order_number } });
+      navigate({ to: "/order-success", search: { o: order.order_number, m: form.payment, s: screenshotUrl ? 1 : 0 } });
     } catch (e: any) {
       toast.error(e.message ?? "Could not place order");
     } finally {
@@ -230,6 +234,15 @@ function Checkout() {
                   {selectedPayment.instructions && <div className="text-foreground">{selectedPayment.instructions}</div>}
                   {selectedPayment.account_title && <div><span className="text-muted-foreground">Account Title:</span> <b>{selectedPayment.account_title}</b></div>}
                   {selectedPayment.account_number && <div><span className="text-muted-foreground">Account #:</span> <b className="font-mono text-[var(--gold)]">{selectedPayment.account_number}</b></div>}
+                  <div className="pt-1 text-foreground">📱 Send <b className="text-[var(--gold)]">PKR {total}</b> to <b className="font-mono">{selectedPayment.account_number}</b></div>
+                </div>
+              )}
+              {isOnlinePayment && (
+                <div className="mt-3 space-y-2">
+                  <PaymentScreenshotUpload value={screenshotUrl} onChange={setScreenshotUrl} />
+                  <div className="text-[11px] text-muted-foreground leading-relaxed">
+                    💡 Screenshot zaroori nahi — order place karein, phir WhatsApp pe bhej dein.
+                  </div>
                 </div>
               )}
             </Card>

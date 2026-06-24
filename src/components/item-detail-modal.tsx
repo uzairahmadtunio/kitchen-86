@@ -39,12 +39,14 @@ export function ItemDetailModal({
   const [sizeIdx, setSizeIdx] = useState<number>(0);
   const [picked, setPicked] = useState<Record<number, boolean>>({});
   const [qty, setQty] = useState(1);
+  const [spice, setSpice] = useState<string>("Medium");
 
   // Reset state when switching items
   useEffect(() => {
     setSizeIdx(0);
     setPicked({});
     setQty(1);
+    setSpice("Medium");
   }, [item.id]);
 
   // Lock body scroll
@@ -74,11 +76,12 @@ export function ItemDetailModal({
   function handleAdd() {
     const sizeLabel = sizes[sizeIdx]?.label;
     const addonLabels = addons.filter((_, i) => picked[i]).map((a) => a.label);
-    const variantKey = [sizeLabel, ...addonLabels].filter(Boolean).join("|");
-    const id = variantKey ? `${item.id}::${variantKey}` : item.id;
+    const variantKey = [sizeLabel, ...addonLabels, `spice:${spice}`].filter(Boolean).join("|");
+    const id = `${item.id}::${variantKey}`;
     const noteParts: string[] = [];
     if (sizeLabel && sizes.length > 1) noteParts.push(`Size: ${sizeLabel}`);
     if (addonLabels.length) noteParts.push(`Add-ons: ${addonLabels.join(", ")}`);
+    noteParts.push(`Spice: ${spice}`);
     add({
       id,
       itemId: item.id,
@@ -86,7 +89,7 @@ export function ItemDetailModal({
       price: unit,
       image: item.image_url ?? undefined,
       quantity: qty,
-      notes: noteParts.join(" · ") || undefined,
+      notes: noteParts.join(" · "),
     });
     toast.success(`✅ Added ${qty}× ${item.name} to cart`);
     onClose();
@@ -213,6 +216,30 @@ export function ItemDetailModal({
             </div>
           )}
 
+          {/* Spice level */}
+          <div className="px-5 sm:px-6 mt-6">
+            <div className="text-xs font-black uppercase tracking-wider text-muted-foreground mb-2">Spice Level</div>
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { label: "Mild", icon: "🟢" },
+                { label: "Medium", icon: "🟡" },
+                { label: "Hot", icon: "🔴" },
+                { label: "Extra Hot", icon: "🔥" },
+              ].map((s) => (
+                <button
+                  key={s.label}
+                  onClick={() => setSpice(s.label)}
+                  className={`flex flex-col items-center justify-center gap-1 rounded-xl border-2 py-3 text-[11px] font-bold transition ${
+                    spice === s.label ? "border-primary bg-[var(--secondary-bg)]" : "border-border hover:border-primary/50"
+                  }`}
+                >
+                  <span className="text-lg leading-none">{s.icon}</span>
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Quantity */}
           <div className="px-5 sm:px-6 mt-6">
             <div className="text-xs font-black uppercase tracking-wider text-muted-foreground mb-2">Quantity</div>
@@ -252,13 +279,19 @@ export function ItemDetailModal({
 
         {/* Sticky add-to-cart */}
         <div className="absolute sm:static bottom-0 inset-x-0 border-t border-border bg-card p-4 sm:rounded-b-2xl">
-          <button
-            onClick={handleAdd}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-xl fire-gradient px-6 py-3.5 text-sm font-black uppercase text-white"
-          >
-            <ShoppingCart className="h-4 w-4" />
-            Add to Cart — {pkr(total)}
-          </button>
+          {item.is_available === false ? (
+            <button disabled className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-muted px-6 py-3.5 text-sm font-black uppercase text-muted-foreground cursor-not-allowed">
+              Currently Unavailable
+            </button>
+          ) : (
+            <button
+              onClick={handleAdd}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl fire-gradient px-6 py-3.5 text-sm font-black uppercase text-white"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              Add to Cart — {pkr(total)}
+            </button>
+          )}
         </div>
       </div>
     </div>

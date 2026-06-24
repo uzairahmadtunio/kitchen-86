@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { useState, useMemo } from "react";
+import { Search, X } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { MenuCard } from "@/components/menu-card";
@@ -34,7 +35,17 @@ function MenuPage() {
   const { data: cats } = useSuspenseQuery(catsQO);
   const { data: deals } = useSuspenseQuery(dealsQO);
   const [active, setActive] = useState<string>("all");
+  const [query, setQuery] = useState("");
   const [openItem, setOpenItem] = useState<MenuItem | null>(null);
+
+  const q = query.trim().toLowerCase();
+  const searchResults = useMemo(() => {
+    if (!q) return [];
+    return menu.filter((m) =>
+      m.name.toLowerCase().includes(q) ||
+      (m.description ?? "").toLowerCase().includes(q)
+    );
+  }, [q, menu]);
 
   const filtered = useMemo(() => active === "all" ? menu : menu.filter((m) => m.category_id === active), [active, menu]);
 
@@ -43,24 +54,56 @@ function MenuPage() {
       <SiteHeader />
 
       <section className="border-b border-border bg-[var(--secondary-bg)]">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 sm:py-10">
           <div className="text-xs uppercase tracking-[0.25em] text-primary font-bold">Full Menu</div>
           <h1 className="mt-2 text-4xl sm:text-5xl font-black">Pick Your <span className="fire-text">Fire</span></h1>
+          {/* Search bar */}
+          <div className="mt-5 relative max-w-xl">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search for burgers, fries..."
+              className="w-full rounded-xl border-2 border-border bg-background pl-11 pr-11 py-3 text-sm font-medium placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition"
+            />
+            {query && (
+              <button onClick={() => setQuery("")} aria-label="Clear" className="absolute right-3 top-1/2 -translate-y-1/2 grid h-7 w-7 place-items-center rounded-full bg-muted hover:bg-border">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
         </div>
       </section>
 
-      <section className="sticky top-[57px] z-30 border-b border-border bg-background/95 backdrop-blur">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 flex gap-2 overflow-x-auto no-scrollbar">
-          <CategoryChip label="All" active={active === "all"} onClick={() => setActive("all")} />
-          {cats.map((c) => (
-            <CategoryChip key={c.id} label={`${c.icon ?? ""} ${c.name}`} active={active === c.id} onClick={() => setActive(c.id)} />
-          ))}
-          <CategoryChip label="🔥 Deals" active={active === "deals"} onClick={() => setActive("deals")} />
-        </div>
-      </section>
+      {!q && (
+        <section className="sticky top-[57px] z-30 border-b border-border bg-background/95 backdrop-blur">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 flex gap-2 overflow-x-auto no-scrollbar">
+            <CategoryChip label="All" active={active === "all"} onClick={() => setActive("all")} />
+            {cats.map((c) => (
+              <CategoryChip key={c.id} label={`${c.icon ?? ""} ${c.name}`} active={active === c.id} onClick={() => setActive(c.id)} />
+            ))}
+            <CategoryChip label="🔥 Deals" active={active === "deals"} onClick={() => setActive("deals")} />
+          </div>
+        </section>
+      )}
 
       <section className="mx-auto max-w-7xl px-4 sm:px-6 py-10 flex-1">
-        {active === "deals" ? (
+        {q ? (
+          searchResults.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="text-5xl mb-3">🔎</div>
+              <div className="text-lg font-bold">No results for "{query}"</div>
+              <div className="text-sm text-muted-foreground mt-1">Try a different keyword</div>
+            </div>
+          ) : (
+            <>
+              <div className="text-sm text-muted-foreground mb-4">{searchResults.length} result{searchResults.length === 1 ? "" : "s"} for "{query}"</div>
+              <div className="grid gap-3 sm:gap-5 grid-cols-2 lg:grid-cols-3">
+                {searchResults.map((m) => <MenuCard key={m.id} item={m} onOpen={setOpenItem} />)}
+              </div>
+            </>
+          )
+        ) : active === "deals" ? (
           <div className="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {deals.map((d) => <DealCard key={d.id} deal={d} />)}
           </div>
