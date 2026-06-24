@@ -1,11 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useState } from "react";
 import { Flame, Phone, MapPin, Clock, Star, ChevronRight } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AnnouncementBar } from "@/components/announcement-bar";
 import { MenuCard } from "@/components/menu-card";
 import { DealCard } from "@/components/deal-card";
+import { ItemDetailModal } from "@/components/item-detail-modal";
+import type { MenuItem } from "@/lib/site-data";
 import { fetchSettings, fetchMenu, fetchDeals, fetchCategories, fetchApprovedReviews } from "@/lib/site-data";
 
 const settingsQO = queryOptions({ queryKey: ["settings"], queryFn: fetchSettings });
@@ -31,6 +34,7 @@ function Home() {
   const { data: deals } = useSuspenseQuery(dealsQO);
   const { data: cats } = useSuspenseQuery(catsQO);
   const { data: reviews } = useSuspenseQuery(reviewsQO);
+  const [openItem, setOpenItem] = useState<MenuItem | null>(null);
 
   const featured = menu.filter((m) => m.is_featured || m.is_bestseller).slice(0, 6);
   const waUrl = `https://wa.me/${(settings.whatsapp ?? "").replace(/\D/g, "")}`;
@@ -118,7 +122,7 @@ function Home() {
           <h2 className="mt-2 text-4xl sm:text-5xl font-black">Fan <span className="fire-text">Favorites</span></h2>
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map((m) => <MenuCard key={m.id} item={m} />)}
+          {featured.map((m) => <MenuCard key={m.id} item={m} onOpen={setOpenItem} />)}
         </div>
         <div className="mt-10 text-center">
           <Link to="/menu" className="inline-flex items-center gap-2 rounded-xl fire-gradient px-6 py-3.5 text-sm font-black uppercase tracking-wider text-white">
@@ -186,6 +190,15 @@ function Home() {
       </section>
 
       <SiteFooter settings={settings} />
+
+      {openItem && (
+        <ItemDetailModal
+          item={openItem}
+          allItems={menu}
+          categories={cats}
+          onClose={() => setOpenItem(null)}
+        />
+      )}
     </div>
   );
 }

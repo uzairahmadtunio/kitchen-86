@@ -5,6 +5,8 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { MenuCard } from "@/components/menu-card";
 import { DealCard } from "@/components/deal-card";
+import { ItemDetailModal } from "@/components/item-detail-modal";
+import type { MenuItem } from "@/lib/site-data";
 import { fetchSettings, fetchMenu, fetchCategories, fetchDeals } from "@/lib/site-data";
 
 const settingsQO = queryOptions({ queryKey: ["settings"], queryFn: fetchSettings });
@@ -32,6 +34,7 @@ function MenuPage() {
   const { data: cats } = useSuspenseQuery(catsQO);
   const { data: deals } = useSuspenseQuery(dealsQO);
   const [active, setActive] = useState<string>("all");
+  const [openItem, setOpenItem] = useState<MenuItem | null>(null);
 
   const filtered = useMemo(() => active === "all" ? menu : menu.filter((m) => m.category_id === active), [active, menu]);
 
@@ -70,7 +73,7 @@ function MenuPage() {
                 <div key={c.id}>
                   <h2 className="text-2xl font-black mb-5">{c.icon} {c.name}</h2>
                   <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    {items.map((m) => <MenuCard key={m.id} item={m} />)}
+                    {items.map((m) => <MenuCard key={m.id} item={m} onOpen={setOpenItem} />)}
                   </div>
                 </div>
               );
@@ -78,12 +81,21 @@ function MenuPage() {
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((m) => <MenuCard key={m.id} item={m} />)}
+            {filtered.map((m) => <MenuCard key={m.id} item={m} onOpen={setOpenItem} />)}
           </div>
         )}
       </section>
 
       <SiteFooter settings={settings} />
+
+      {openItem && (
+        <ItemDetailModal
+          item={openItem}
+          allItems={menu}
+          categories={cats}
+          onClose={() => setOpenItem(null)}
+        />
+      )}
     </div>
   );
 }

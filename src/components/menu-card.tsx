@@ -1,12 +1,14 @@
 import { Flame, Plus } from "lucide-react";
 import type { MenuItem } from "@/lib/site-data";
 import { pkr } from "@/lib/format";
-import { useCart } from "@/lib/cart-context";
 
-export function MenuCard({ item }: { item: MenuItem }) {
-  const { add } = useCart();
+export function MenuCard({ item, onOpen }: { item: MenuItem; onOpen?: (item: MenuItem) => void }) {
+  const soldOut = item.is_available === false;
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card card-hover">
+    <div
+      onClick={() => !soldOut && onOpen?.(item)}
+      className={`group flex flex-col overflow-hidden rounded-2xl border border-border bg-card card-hover ${soldOut ? "opacity-70" : "cursor-pointer"}`}
+    >
       <div className="relative aspect-[4/3] overflow-hidden bg-[var(--secondary-bg)]">
         {item.image_url && (
           <img src={item.image_url} alt={item.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" />
@@ -23,6 +25,11 @@ export function MenuCard({ item }: { item: MenuItem }) {
             </span>
           )}
         </div>
+        {soldOut && (
+          <div className="absolute inset-0 grid place-items-center bg-black/60">
+            <span className="rounded-full bg-black/80 px-4 py-1.5 text-xs font-black uppercase text-white border border-white/20">Sold Out</span>
+          </div>
+        )}
       </div>
       <div className="flex flex-1 flex-col p-4">
         <h3 className="text-base font-bold leading-tight">{item.name}</h3>
@@ -35,8 +42,9 @@ export function MenuCard({ item }: { item: MenuItem }) {
             )}
           </div>
           <button
-            onClick={() => add({ itemId: item.id, name: item.name, price: Number(item.price), image: item.image_url ?? undefined })}
-            className="inline-flex items-center gap-1 rounded-lg fire-gradient px-3 py-2 text-xs font-bold text-white transition-transform hover:scale-105"
+            onClick={(e) => { e.stopPropagation(); !soldOut && onOpen?.(item); }}
+            disabled={soldOut}
+            className="inline-flex items-center gap-1 rounded-lg fire-gradient px-3 py-2 text-xs font-bold text-white transition-transform hover:scale-105 disabled:opacity-40"
           >
             <Plus className="h-3.5 w-3.5" /> Add
           </button>
@@ -45,3 +53,4 @@ export function MenuCard({ item }: { item: MenuItem }) {
     </div>
   );
 }
+

@@ -12,7 +12,7 @@ export type CartItem = {
 
 type CartCtx = {
   items: CartItem[];
-  add: (item: Omit<CartItem, "quantity" | "id"> & { quantity?: number }) => void;
+  add: (item: Omit<CartItem, "quantity" | "id"> & { quantity?: number; id?: string }) => void;
   remove: (id: string) => void;
   update: (id: string, qty: number) => void;
   clear: () => void;
@@ -44,7 +44,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const value = useMemo<CartCtx>(() => ({
     items,
     add: (item) => {
-      const id = `${item.itemId}`;
+      const id = item.id ?? `${item.itemId}`;
       setItems((prev) => {
         const existing = prev.find((p) => p.id === id);
         if (existing) {
