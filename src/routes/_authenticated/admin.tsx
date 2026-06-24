@@ -63,6 +63,7 @@ function AdminPage() {
     { key: "menu", label: "Menu", icon: UtensilsCrossed },
     { key: "deals", label: "Deals", icon: Tag },
     { key: "areas", label: "Delivery Areas", icon: Truck },
+    { key: "payments", label: "Payments", icon: CreditCard },
     { key: "reviews", label: "Reviews", icon: MessageSquare },
     { key: "settings", label: "Settings", icon: SettingsIcon },
   ];
