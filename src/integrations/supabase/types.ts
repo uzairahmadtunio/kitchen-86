@@ -322,6 +322,7 @@ export type Database = {
           id: string
           is_approved: boolean | null
           rating: number
+          video_url: string | null
         }
         Insert: {
           comment?: string | null
@@ -330,6 +331,7 @@ export type Database = {
           id?: string
           is_approved?: boolean | null
           rating: number
+          video_url?: string | null
         }
         Update: {
           comment?: string | null
@@ -338,6 +340,7 @@ export type Database = {
           id?: string
           is_approved?: boolean | null
           rating?: number
+          video_url?: string | null
         }
         Relationships: []
       }
@@ -365,6 +368,10 @@ export type Database = {
     }
     Functions: {
       is_admin: { Args: never; Returns: boolean }
+      track_order: {
+        Args: { p_order_number: string; p_phone: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
