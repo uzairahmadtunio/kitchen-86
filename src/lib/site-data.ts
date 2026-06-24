@@ -28,7 +28,7 @@ export type Deal = {
   display_order: number;
 };
 export type DeliveryArea = { id: string; name: string; charge: number; est_time: string | null; is_active: boolean };
-export type Review = { id: string; customer_name: string; rating: number; comment: string | null; created_at: string; is_approved: boolean };
+export type Review = { id: string; customer_name: string; rating: number; comment: string | null; created_at: string; is_approved: boolean; video_url: string | null };
 
 const sb = supabase as any;
 
