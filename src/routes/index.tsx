@@ -50,41 +50,41 @@ function Home() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,69,0,0.25),transparent_55%),radial-gradient(circle_at_80%_80%,rgba(255,165,0,0.18),transparent_55%)]" />
           <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent,#0A0A0A)]" />
         </div>
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-16 sm:py-24 grid md:grid-cols-2 gap-12 items-center">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-10 sm:py-24 grid md:grid-cols-2 gap-8 md:gap-12 items-center">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
               <Flame className="h-3.5 w-3.5 text-primary" /> Larkana's #1 Fast Food
             </div>
-            <h1 className="mt-5 text-5xl sm:text-7xl font-black leading-[0.95] tracking-tight">
+            <h1 className="mt-4 text-4xl sm:text-6xl md:text-7xl font-black leading-[0.95] tracking-tight">
               ALWAYS <span className="fire-text">FRESH</span>.<br />
               TASTE THE <span className="fire-text">BEST</span>.
             </h1>
-            <p className="mt-5 text-lg text-muted-foreground max-w-md">{settings.hero_subtitle || settings.specialty}</p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/menu" className="inline-flex items-center gap-2 rounded-xl fire-gradient px-6 py-3.5 text-sm font-black uppercase tracking-wider text-white glow-orange transition-transform hover:scale-105">
+            <p className="mt-4 text-base sm:text-lg text-muted-foreground max-w-md">{settings.hero_subtitle || settings.specialty}</p>
+            <div className="mt-6 sm:mt-8 grid grid-cols-2 sm:flex sm:flex-wrap gap-3">
+              <Link to="/menu" className="inline-flex justify-center items-center gap-2 rounded-xl fire-gradient px-5 sm:px-6 py-3.5 text-xs sm:text-sm font-black uppercase tracking-wider text-white glow-orange transition-transform hover:scale-105">
                 Order Now <ChevronRight className="h-4 w-4" />
               </Link>
-              <a href={waUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-xl border-2 border-border bg-card px-6 py-3.5 text-sm font-black uppercase tracking-wider hover:border-primary">
+              <a href={waUrl} target="_blank" rel="noreferrer" className="inline-flex justify-center items-center gap-2 rounded-xl border-2 border-border bg-card px-5 sm:px-6 py-3.5 text-xs sm:text-sm font-black uppercase tracking-wider hover:border-primary">
                 <Phone className="h-4 w-4" /> WhatsApp
               </a>
             </div>
-            <div className="mt-8 flex flex-wrap gap-6 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4 text-primary" /> {settings.address}</span>
-              <span className="inline-flex items-center gap-2"><Clock className="h-4 w-4 text-primary" /> {settings.hours}</span>
+            <div className="mt-6 sm:mt-8 flex gap-4 sm:gap-6 text-[11px] sm:text-xs text-muted-foreground overflow-x-auto no-scrollbar">
+              <span className="inline-flex items-center gap-2 whitespace-nowrap"><MapPin className="h-4 w-4 text-primary shrink-0" /> {settings.address}</span>
+              <span className="inline-flex items-center gap-2 whitespace-nowrap"><Clock className="h-4 w-4 text-primary shrink-0" /> {settings.hours}</span>
             </div>
           </div>
           <div className="relative">
             <div className="aspect-square rounded-3xl overflow-hidden border-2 border-border glow-orange">
               <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=900&q=80" alt="Signature Zinger 86" className="h-full w-full object-cover" />
             </div>
-            <div className="absolute -bottom-4 -left-4 rounded-2xl bg-card border border-border p-4 shadow-2xl">
-              <div className="text-xs text-muted-foreground">Signature</div>
-              <div className="text-lg font-black">Zinger 86</div>
-              <div className="text-[var(--gold)] font-black text-xl">PKR 399</div>
+            <div className="absolute -bottom-3 -left-3 sm:-bottom-4 sm:-left-4 rounded-2xl bg-card border border-border p-3 sm:p-4 shadow-2xl">
+              <div className="text-[10px] sm:text-xs text-muted-foreground">Signature</div>
+              <div className="text-sm sm:text-lg font-black">Zinger 86</div>
+              <div className="text-[var(--gold)] font-black text-base sm:text-xl">PKR 399</div>
             </div>
-            <div className="absolute -top-4 -right-4 rounded-2xl fire-gradient p-4 text-white shadow-2xl rotate-3">
-              <div className="text-2xl font-black">🔥</div>
-              <div className="text-xs font-bold uppercase">Ao Lootlo</div>
+            <div className="absolute -top-3 -right-3 sm:-top-4 sm:-right-4 rounded-2xl fire-gradient p-3 sm:p-4 text-white shadow-2xl rotate-3">
+              <div className="text-xl sm:text-2xl font-black">🔥</div>
+              <div className="text-[10px] sm:text-xs font-bold uppercase">Ao Lootlo</div>
             </div>
           </div>
         </div>
@@ -92,25 +92,25 @@ function Home() {
 
       {/* CATEGORIES STRIP */}
       <section className="border-y border-border bg-[var(--secondary-bg)]">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 flex flex-wrap justify-center gap-3">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-4 sm:py-6 flex sm:flex-wrap sm:justify-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar">
           {cats.map((c) => (
-            <a key={c.id} href="/menu" className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-bold hover:border-primary transition-colors">
-              <span className="text-lg">{c.icon}</span> {c.name}
+            <a key={c.id} href="/menu" className="shrink-0 inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 sm:px-4 py-2 text-xs sm:text-sm font-bold hover:border-primary transition-colors whitespace-nowrap">
+              <span className="text-base sm:text-lg">{c.icon}</span> {c.name}
             </a>
           ))}
         </div>
       </section>
 
       {/* DEALS */}
-      <section id="deals" className="mx-auto max-w-7xl px-4 sm:px-6 py-16">
-        <div className="flex items-end justify-between mb-8">
+      <section id="deals" className="mx-auto max-w-7xl px-4 sm:px-6 py-12 sm:py-16">
+        <div className="flex items-end justify-between mb-6 sm:mb-8">
           <div>
             <div className="text-xs uppercase tracking-[0.25em] text-primary font-bold">🔥 Ao Lootlo</div>
-            <h2 className="mt-2 text-4xl sm:text-5xl font-black">Hot <span className="fire-text">Deals</span></h2>
+            <h2 className="mt-2 text-3xl sm:text-5xl font-black">Hot <span className="fire-text">Deals</span></h2>
           </div>
           <Link to="/menu" className="hidden sm:inline-flex items-center text-sm font-bold text-muted-foreground hover:text-foreground gap-1">See menu <ChevronRight className="h-4 w-4" /></Link>
         </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {deals.map((d) => <DealCard key={d.id} deal={d} />)}
         </div>
       </section>
