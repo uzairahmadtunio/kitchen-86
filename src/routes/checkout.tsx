@@ -39,27 +39,52 @@ function Checkout() {
   const { items, subtotal, clear } = useCart();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({ name: "", phone: "", address: "", area: "", notes: "", payment: "cod" as "cod" | "online" });
+  const [form, setForm] = useState({ name: "", phone: "", address: "", area: "", customArea: "", notes: "", payment: "cod" as "cod" | "online" });
   const [submitting, setSubmitting] = useState(false);
 
   const selectedArea = areas.find((a) => a.id === form.area);
+  const isCustom = (selectedArea?.zone ?? "").toLowerCase() === "custom";
   const deliveryCharge = Number(selectedArea?.charge ?? 0);
   const total = subtotal + deliveryCharge;
+
+  const grouped = areas.reduce<Record<string, typeof areas>>((acc, a) => {
+    const z = (a.zone ?? "Other").toUpperCase();
+    (acc[z] = acc[z] ?? []).push(a);
+    return acc;
+  }, {});
+  const zoneOrder = ["A", "B", "C", "D", "CUSTOM", "OTHER"];
+  const zoneKeys = Object.keys(grouped).sort((a, b) => {
+    const ai = zoneOrder.indexOf(a); const bi = zoneOrder.indexOf(b);
+    return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
+  });
+  const zoneLabel = (z: string) =>
+    z === "CUSTOM" ? "Other / Custom" : z === "OTHER" ? "Other" : `Zone ${z}`;
 
   async function placeOrder() {
     const parsed = schema.safeParse(form);
     if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
     if (!items.length) { toast.error("Your cart is empty"); return; }
 
+    if (isCustom && form.customArea.trim().length < 3) {
+      toast.error("Please describe your area"); return;
+    }
+
     setSubmitting(true);
     try {
+      const areaName = isCustom
+        ? `Other / Custom — ${form.customArea.trim()}`
+        : (selectedArea?.name ?? null);
+      const composedNotes = isCustom
+        ? `[Custom area — charge to be confirmed on WhatsApp]\n${form.notes || ""}`.trim()
+        : (form.notes || null);
+
       const { data: order, error } = await (supabase as any).from("orders").insert({
         customer_name: form.name,
         customer_phone: form.phone,
-        delivery_area: selectedArea?.name ?? null,
+        delivery_area: areaName,
         delivery_charge: deliveryCharge,
         address: form.address,
-        notes: form.notes || null,
+        notes: composedNotes,
         payment_method: form.payment,
         subtotal,
         total,
@@ -116,11 +141,35 @@ function Checkout() {
 
             <Card title="Delivery">
               <Field label="Area">
-                <select className={inputCls} value={form.area} onChange={(e)=>setForm({...form,area:e.target.value})}>
+                <select className={inputCls} value={form.area} onChange={(e)=>setForm({...form,area:e.target.value, customArea: ""})}>
                   <option value="">Select area in Larkana</option>
-                  {areas.map((a) => <option key={a.id} value={a.id}>{a.name} — {pkr(a.charge)} · {a.est_time}</option>)}
+                  {zoneKeys.map((z) => (
+                    <optgroup key={z} label={`${zoneLabel(z)} — ${z === "CUSTOM" ? "Custom charge" : `PKR ${grouped[z][0].charge}`}`}>
+                      {grouped[z].map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.name} {z !== "CUSTOM" ? `— ${pkr(a.charge)} · ${a.est_time}` : ""}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
                 </select>
               </Field>
+              {selectedArea && !isCustom && (
+                <div className="rounded-lg border border-border bg-[var(--secondary-bg)] px-3 py-2 text-xs">
+                  <span className="text-muted-foreground">Delivery charge:</span> <b className="text-[var(--gold)]">{pkr(deliveryCharge)}</b>
+                  <span className="text-muted-foreground"> · ETA:</span> <b>{selectedArea.est_time}</b>
+                </div>
+              )}
+              {isCustom && (
+                <>
+                  <Field label="Please describe your area">
+                    <input className={inputCls} value={form.customArea} onChange={(e)=>setForm({...form,customArea:e.target.value})} placeholder="e.g. Near XYZ school, behind ABC market" />
+                  </Field>
+                  <div className="rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2 text-xs text-[var(--gold)]">
+                    🟡 Delivery charge PKR 100 — Admin will confirm exact charge on WhatsApp
+                  </div>
+                </>
+              )}
               <Field label="Address"><textarea className={inputCls} rows={3} value={form.address} onChange={(e)=>setForm({...form,address:e.target.value})} placeholder="House #, Street, Landmark" /></Field>
               <Field label="Notes (optional)"><textarea className={inputCls} rows={2} value={form.notes} onChange={(e)=>setForm({...form,notes:e.target.value})} placeholder="Extra sauce, no onions, etc." /></Field>
             </Card>
