@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Flame, LogOut, ShoppingBag, UtensilsCrossed, Tag, MessageSquare, Settings as SettingsIcon, Star, Trash2, Pencil, Plus, Check, X, Truck, CreditCard, LayoutDashboard, Sparkles, ShieldCheck } from "lucide-react";
+import { Flame, LogOut, ShoppingBag, UtensilsCrossed, Tag, MessageSquare, Settings as SettingsIcon, Star, Trash2, Pencil, Plus, Check, X, Truck, CreditCard, LayoutDashboard, Sparkles, ShieldCheck, FileText, Users, ArrowUp, ArrowDown, ExternalLink } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { pkr } from "@/lib/format";
 import { MediaUpload } from "@/components/media-upload";
