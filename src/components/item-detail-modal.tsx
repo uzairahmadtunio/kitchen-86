@@ -216,6 +216,30 @@ export function ItemDetailModal({
             </div>
           )}
 
+          {/* Spice level */}
+          <div className="px-5 sm:px-6 mt-6">
+            <div className="text-xs font-black uppercase tracking-wider text-muted-foreground mb-2">Spice Level</div>
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { label: "Mild", icon: "🟢" },
+                { label: "Medium", icon: "🟡" },
+                { label: "Hot", icon: "🔴" },
+                { label: "Extra Hot", icon: "🔥" },
+              ].map((s) => (
+                <button
+                  key={s.label}
+                  onClick={() => setSpice(s.label)}
+                  className={`flex flex-col items-center justify-center gap-1 rounded-xl border-2 py-3 text-[11px] font-bold transition ${
+                    spice === s.label ? "border-primary bg-[var(--secondary-bg)]" : "border-border hover:border-primary/50"
+                  }`}
+                >
+                  <span className="text-lg leading-none">{s.icon}</span>
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Quantity */}
           <div className="px-5 sm:px-6 mt-6">
             <div className="text-xs font-black uppercase tracking-wider text-muted-foreground mb-2">Quantity</div>
