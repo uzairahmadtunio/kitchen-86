@@ -86,6 +86,8 @@ function AdminPage() {
     { key: "payments", label: "Payments", icon: CreditCard, emoji: "💳" },
     { key: "suggestions", label: "Suggestions", icon: Sparkles, emoji: "✨" },
     { key: "reviews", label: "Reviews", icon: MessageSquare, emoji: "⭐" },
+    { key: "pages", label: "Pages", icon: FileText, emoji: "📄" },
+    { key: "team", label: "Team", icon: Users, emoji: "👥" },
     { key: "settings", label: "Settings", icon: SettingsIcon, emoji: "⚙️" },
   ];
 
