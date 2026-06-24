@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ShoppingBag, Menu as MenuIcon, X, Flame, Package, Phone } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/lib/cart-context";
 import { OrderTrackingBanner } from "@/components/order-tracking-banner";
 
