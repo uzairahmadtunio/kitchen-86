@@ -38,11 +38,14 @@ const schema = z.object({
 function Checkout() {
   const { data: settings } = useSuspenseQuery(settingsQO);
   const { data: areas } = useSuspenseQuery(areasQO);
+  const { data: paymentMethods } = useSuspenseQuery(paymentsQO);
   const { items, subtotal, clear } = useCart();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({ name: "", phone: "", address: "", area: "", customArea: "", notes: "", payment: "cod" as "cod" | "online" });
+  const defaultPayment = paymentMethods[0]?.code ?? "cod";
+  const [form, setForm] = useState({ name: "", phone: "", address: "", area: "", customArea: "", notes: "", payment: defaultPayment });
   const [submitting, setSubmitting] = useState(false);
+  const selectedPayment = paymentMethods.find((p) => p.code === form.payment);
 
   const selectedArea = areas.find((a) => a.id === form.area);
   const isCustom = (selectedArea?.zone ?? "").toLowerCase() === "custom";
