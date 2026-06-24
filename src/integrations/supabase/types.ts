@@ -281,6 +281,8 @@ export type Database = {
           notes: string | null
           order_number: string
           payment_method: string | null
+          payment_screenshot_url: string | null
+          payment_verified: boolean
           status: string | null
           subtotal: number
           total: number
@@ -296,6 +298,8 @@ export type Database = {
           notes?: string | null
           order_number?: string
           payment_method?: string | null
+          payment_screenshot_url?: string | null
+          payment_verified?: boolean
           status?: string | null
           subtotal: number
           total: number
@@ -311,6 +315,8 @@ export type Database = {
           notes?: string | null
           order_number?: string
           payment_method?: string | null
+          payment_screenshot_url?: string | null
+          payment_verified?: boolean
           status?: string | null
           subtotal?: number
           total?: number
