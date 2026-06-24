@@ -31,20 +31,20 @@ export function MenuCard({ item, onOpen }: { item: MenuItem; onOpen?: (item: Men
           </div>
         )}
       </div>
-      <div className="flex flex-1 flex-col p-4">
-        <h3 className="text-base font-bold leading-tight">{item.name}</h3>
-        {item.description && <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{item.description}</p>}
-        <div className="mt-auto pt-4 flex items-end justify-between gap-2">
+      <div className="flex flex-1 flex-col p-3 sm:p-4">
+        <h3 className="text-sm sm:text-base font-bold leading-tight line-clamp-2">{item.name}</h3>
+        {item.description && <p className="mt-1 text-[11px] sm:text-xs text-muted-foreground line-clamp-2 hidden sm:block">{item.description}</p>}
+        <div className="mt-auto pt-3 sm:pt-4 flex items-end justify-between gap-2">
           <div>
-            <div className="text-lg font-black text-[var(--gold)]">{pkr(item.price)}</div>
+            <div className="text-base sm:text-lg font-black text-[var(--gold)]">{pkr(item.price)}</div>
             {item.original_price && Number(item.original_price) > Number(item.price) && (
-              <div className="text-xs text-muted-foreground line-through">{pkr(item.original_price)}</div>
+              <div className="text-[10px] sm:text-xs text-muted-foreground line-through">{pkr(item.original_price)}</div>
             )}
           </div>
           <button
             onClick={(e) => { e.stopPropagation(); !soldOut && onOpen?.(item); }}
             disabled={soldOut}
-            className="inline-flex items-center gap-1 rounded-lg fire-gradient px-3 py-2 text-xs font-bold text-white transition-transform hover:scale-105 disabled:opacity-40"
+            className="inline-flex items-center gap-1 rounded-lg fire-gradient px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold text-white transition-transform hover:scale-105 disabled:opacity-40"
           >
             <Plus className="h-3.5 w-3.5" /> Add
           </button>
