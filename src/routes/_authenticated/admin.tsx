@@ -160,18 +160,24 @@ function OrdersTab() {
         <div className="divide-y divide-border">
           {orders.map((o: any) => (
             <div key={o.id}>
-              <button onClick={() => setExpanded(expanded === o.id ? null : o.id)} className="w-full grid grid-cols-[1fr_auto] sm:grid-cols-[160px_1fr_120px_100px_120px] gap-3 px-5 py-4 text-left hover:bg-[var(--secondary-bg)]">
-                <div>
+              <button onClick={() => setExpanded(expanded === o.id ? null : o.id)} className="w-full grid grid-cols-[1fr_auto] sm:grid-cols-[160px_1fr_120px_100px_120px] gap-3 px-4 sm:px-5 py-3 sm:py-4 text-left hover:bg-[var(--secondary-bg)]">
+                <div className="min-w-0">
                   <div className="font-mono text-xs text-[var(--gold)] font-bold">{o.order_number}</div>
-                  <div className="text-[11px] text-muted-foreground">{new Date(o.created_at).toLocaleString()}</div>
+                  <div className="text-[11px] text-muted-foreground truncate">{new Date(o.created_at).toLocaleString()}</div>
+                  <div className="sm:hidden mt-1 font-bold text-sm truncate">{o.customer_name}</div>
+                  <div className="sm:hidden text-[11px] text-muted-foreground truncate">{o.customer_phone}</div>
                 </div>
-                <div className="hidden sm:block">
-                  <div className="font-bold">{o.customer_name}</div>
-                  <div className="text-xs text-muted-foreground">{o.customer_phone} · {o.delivery_area}</div>
+                <div className="hidden sm:block min-w-0">
+                  <div className="font-bold truncate">{o.customer_name}</div>
+                  <div className="text-xs text-muted-foreground truncate">{o.customer_phone} · {o.delivery_area}</div>
                 </div>
                 <div className="hidden sm:block font-black text-[var(--gold)]">{pkr(o.total)}</div>
                 <div className="hidden sm:block"><StatusBadge status={o.status} /></div>
-                <div className="text-xs text-muted-foreground">{expanded === o.id ? "Hide" : "View"}</div>
+                <div className="text-right flex flex-col items-end gap-1">
+                  <span className="sm:hidden font-black text-[var(--gold)] text-sm">{pkr(o.total)}</span>
+                  <span className="sm:hidden"><StatusBadge status={o.status} /></span>
+                  <span className="text-[11px] text-muted-foreground">{expanded === o.id ? "Hide" : "View"}</span>
+                </div>
               </button>
               {expanded === o.id && (
                 <div className="bg-[var(--secondary-bg)] px-5 py-4 border-t border-border space-y-3">
