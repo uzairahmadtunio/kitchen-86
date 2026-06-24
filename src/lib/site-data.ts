@@ -27,7 +27,7 @@ export type Deal = {
   is_active: boolean;
   display_order: number;
 };
-export type DeliveryArea = { id: string; name: string; charge: number; est_time: string | null; is_active: boolean };
+export type DeliveryArea = { id: string; name: string; zone: string | null; charge: number; est_time: string | null; is_active: boolean };
 export type Review = { id: string; customer_name: string; rating: number; comment: string | null; created_at: string; is_approved: boolean; video_url: string | null };
 
 const sb = supabase as any;
@@ -51,7 +51,7 @@ export async function fetchDeals(): Promise<Deal[]> {
   return data ?? [];
 }
 export async function fetchAreas(): Promise<DeliveryArea[]> {
-  const { data } = await sb.from("delivery_areas").select("*").eq("is_active", true).order("charge");
+  const { data } = await sb.from("delivery_areas").select("*").eq("is_active", true).order("zone").order("name");
   return data ?? [];
 }
 export async function fetchApprovedReviews(): Promise<Review[]> {
