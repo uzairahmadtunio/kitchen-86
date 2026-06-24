@@ -6,6 +6,7 @@ import { Flame, LogOut, ShoppingBag, UtensilsCrossed, Tag, MessageSquare, Settin
 import { supabase } from "@/integrations/supabase/client";
 import { pkr } from "@/lib/format";
 import { MediaUpload } from "@/components/media-upload";
+import { playDing, flashTitle, unlockAlertSound } from "@/lib/new-order-alerts";
 
 const sb = supabase as any;
 
