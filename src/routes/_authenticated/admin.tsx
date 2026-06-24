@@ -1019,6 +1019,170 @@ const ic = "w-full rounded-lg border border-border bg-[var(--secondary-bg)] px-3
 function FormField({ label, children }: { label: string; children: React.ReactNode }) {
   return <label className="block"><span className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1">{label}</span>{children}</label>;
 }
+
+/* -------- PAGES MANAGER -------- */
+const CORE_PAGE_SLUGS = ["privacy-policy", "about-us", "contact-us"];
+
+function PagesTab() {
+  const qc = useQueryClient();
+  const { data: rows = [] } = useQuery({
+    queryKey: ["admin", "pages"],
+    queryFn: async () => { const { data } = await sb.from("pages").select("*").order("slug"); return data ?? []; },
+  });
+  const [editing, setEditing] = useState<any | null>(null);
+
+  async function save() {
+    if (!editing) return;
+    const { id, title, content, is_active } = editing;
+    const { error } = await sb.from("pages").update({ title, content, is_active }).eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Page updated"); setEditing(null);
+    qc.invalidateQueries({ queryKey: ["admin", "pages"] });
+    qc.invalidateQueries({ queryKey: ["page", editing.slug] });
+  }
+
+  return (
+    <div>
+      <h2 className="text-2xl font-black mb-1">📄 Pages</h2>
+      <p className="text-sm text-muted-foreground mb-5">Edit footer pages — changes go live instantly.</p>
+      <div className="rounded-2xl border border-border bg-card divide-y divide-border">
+        {rows.length === 0 && <div className="p-8 text-center text-muted-foreground">No pages yet</div>}
+        {rows.map((r: any) => (
+          <div key={r.id} className="flex items-center gap-3 px-5 py-4">
+            <div className="flex-1 min-w-0">
+              <div className="font-bold truncate">{r.title}</div>
+              <div className="text-xs text-muted-foreground font-mono">/{r.slug}</div>
+            </div>
+            <span className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${r.is_active?"bg-[var(--success)]/15 text-[var(--success)]":"bg-muted text-muted-foreground"}`}>{r.is_active?"Live":"Hidden"}</span>
+            <a href={`/${r.slug === "about-us" ? "about" : r.slug === "contact-us" ? "contact" : r.slug}`} target="_blank" rel="noreferrer" className="rounded-lg border border-border px-2 py-1.5 text-xs font-bold hover:border-primary"><ExternalLink className="h-3 w-3" /></a>
+            <button onClick={()=>setEditing(r)} className="rounded-lg fire-gradient px-3 py-1.5 text-xs font-bold text-white"><Pencil className="h-3 w-3 inline mr-1" /> Edit</button>
+          </div>
+        ))}
+      </div>
+
+      {editing && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur grid place-items-center p-4" onClick={()=>setEditing(null)}>
+          <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card p-6" onClick={(e)=>e.stopPropagation()}>
+            <h3 className="text-xl font-black mb-1">Edit Page</h3>
+            <div className="text-xs text-muted-foreground font-mono mb-5">/{editing.slug}</div>
+            <div className="space-y-3">
+              <FormField label="Title"><input className={ic} value={editing.title ?? ""} onChange={(e)=>setEditing({...editing, title: e.target.value})} /></FormField>
+              <FormField label="Content (plain text / markdown)">
+                <textarea className={ic + " font-mono text-xs"} rows={18} value={editing.content ?? ""} onChange={(e)=>setEditing({...editing, content: e.target.value})} />
+              </FormField>
+              {!CORE_PAGE_SLUGS.includes(editing.slug) && (
+                <Toggle label="Active" v={editing.is_active} onChange={(v)=>setEditing({...editing, is_active: v})} />
+              )}
+              {CORE_PAGE_SLUGS.includes(editing.slug) && (
+                <div className="text-[11px] text-muted-foreground">🔒 Core page — cannot be deleted or hidden.</div>
+              )}
+            </div>
+            <div className="mt-5 flex gap-2 justify-end">
+              <button onClick={()=>setEditing(null)} className="rounded-lg border border-border px-4 py-2 text-sm font-bold">Cancel</button>
+              <button onClick={save} className="rounded-lg fire-gradient px-4 py-2 text-sm font-bold text-white">Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* -------- TEAM MANAGER -------- */
+function TeamTab() {
+  const qc = useQueryClient();
+  const { data: rows = [] } = useQuery({
+    queryKey: ["admin", "team"],
+    queryFn: async () => { const { data } = await sb.from("team_members").select("*").order("display_order"); return data ?? []; },
+  });
+  const [editing, setEditing] = useState<any | null>(null);
+
+  async function save(r: any) {
+    if (!r.name?.trim()) return toast.error("Name is required");
+    const { id, ...rest } = r;
+    const action = id ? sb.from("team_members").update(rest).eq("id", id) : sb.from("team_members").insert(rest);
+    const { error } = await action;
+    if (error) return toast.error(error.message);
+    toast.success("Saved"); setEditing(null);
+    qc.invalidateQueries({ queryKey: ["admin", "team"] });
+    qc.invalidateQueries({ queryKey: ["team"] });
+  }
+  async function del(id: string) {
+    if (!confirm("Remove this team member?")) return;
+    await sb.from("team_members").delete().eq("id", id);
+    toast.success("Removed");
+    qc.invalidateQueries({ queryKey: ["admin", "team"] });
+    qc.invalidateQueries({ queryKey: ["team"] });
+  }
+  async function move(r: any, dir: -1 | 1) {
+    const next = Math.max(0, (r.display_order ?? 0) + dir);
+    await sb.from("team_members").update({ display_order: next }).eq("id", r.id);
+    qc.invalidateQueries({ queryKey: ["admin", "team"] });
+    qc.invalidateQueries({ queryKey: ["team"] });
+  }
+  async function toggleActive(r: any) {
+    await sb.from("team_members").update({ is_active: !r.is_active }).eq("id", r.id);
+    qc.invalidateQueries({ queryKey: ["admin", "team"] });
+    qc.invalidateQueries({ queryKey: ["team"] });
+  }
+
+  return (
+    <div>
+      <div className="flex items-start justify-between mb-5 gap-2">
+        <div>
+          <h2 className="text-2xl font-black">👥 Team</h2>
+          <p className="text-sm text-muted-foreground mt-1">Manage members shown on the About page.</p>
+        </div>
+        <button onClick={()=>setEditing({ name: "", role: "", bio: "", image_url: "", display_order: rows.length, is_active: true })} className="inline-flex items-center gap-1 rounded-lg fire-gradient px-4 py-2 text-sm font-bold text-white"><Plus className="h-4 w-4" /> Add Member</button>
+      </div>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {rows.length === 0 && <div className="col-span-full rounded-2xl border border-border bg-card p-8 text-center text-muted-foreground">No team members yet</div>}
+        {rows.map((r: any) => (
+          <div key={r.id} className="rounded-2xl border border-border bg-card p-4">
+            <div className="flex items-center gap-3">
+              <div className="h-16 w-16 rounded-full overflow-hidden border-2 border-[var(--primary)] grid place-items-center bg-[var(--secondary-bg)] shrink-0">
+                {r.image_url ? <img src={r.image_url} alt={r.name} className="h-full w-full object-cover" /> : <span className="text-sm font-black fire-text">{r.name.split(/\s+/).slice(0,2).map((p: string)=>p[0]?.toUpperCase()).join("")}</span>}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-black truncate">{r.name}</div>
+                <div className="text-xs text-[var(--primary)] font-bold truncate">{r.role}</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">order {r.display_order}</div>
+              </div>
+            </div>
+            {r.bio && <p className="mt-3 text-xs text-muted-foreground line-clamp-3">{r.bio}</p>}
+            <div className="mt-3 flex items-center gap-1.5 flex-wrap">
+              <button onClick={()=>toggleActive(r)} className={`rounded-md px-2 py-1 text-[10px] font-black uppercase ${r.is_active?"bg-[var(--success)]/15 text-[var(--success)]":"bg-muted text-muted-foreground"}`}>{r.is_active?"Active":"Hidden"}</button>
+              <button onClick={()=>move(r, -1)} className="rounded-md border border-border px-2 py-1 text-xs"><ArrowUp className="h-3 w-3" /></button>
+              <button onClick={()=>move(r, 1)} className="rounded-md border border-border px-2 py-1 text-xs"><ArrowDown className="h-3 w-3" /></button>
+              <button onClick={()=>setEditing(r)} className="ml-auto rounded-md border border-border px-2 py-1 text-xs hover:border-primary"><Pencil className="h-3 w-3" /></button>
+              <button onClick={()=>del(r.id)} className="rounded-md border border-border px-2 py-1 text-xs text-destructive hover:border-destructive"><Trash2 className="h-3 w-3" /></button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {editing && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur grid place-items-center p-4" onClick={()=>setEditing(null)}>
+          <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card p-6" onClick={(e)=>e.stopPropagation()}>
+            <h3 className="text-xl font-black mb-4">{editing.id?"Edit":"Add"} Team Member</h3>
+            <div className="space-y-3">
+              <FormField label="Full Name"><input className={ic} value={editing.name ?? ""} onChange={(e)=>setEditing({...editing, name: e.target.value})} placeholder="Muhammad Ali" /></FormField>
+              <FormField label="Role / Position"><input className={ic} value={editing.role ?? ""} onChange={(e)=>setEditing({...editing, role: e.target.value})} placeholder="Head Chef, Manager, Delivery Rider…" /></FormField>
+              <FormField label="Bio"><textarea className={ic} rows={3} value={editing.bio ?? ""} onChange={(e)=>setEditing({...editing, bio: e.target.value})} placeholder="Short description…" /></FormField>
+              <MediaUpload label="Photo" folder="team" value={editing.image_url ?? ""} onChange={(url)=>setEditing({...editing, image_url: url})} />
+              <FormField label="Display Order"><input type="number" className={ic} value={editing.display_order ?? 0} onChange={(e)=>setEditing({...editing, display_order: Number(e.target.value)})} /></FormField>
+              <Toggle label="Active" v={editing.is_active} onChange={(v)=>setEditing({...editing, is_active: v})} />
+            </div>
+            <div className="mt-5 flex gap-2 justify-end">
+              <button onClick={()=>setEditing(null)} className="rounded-lg border border-border px-4 py-2 text-sm font-bold">Cancel</button>
+              <button onClick={()=>save(editing)} className="rounded-lg fire-gradient px-4 py-2 text-sm font-bold text-white">Save Member</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 function Toggle({ label, v, onChange }: { label: string; v: boolean; onChange: (v: boolean) => void }) {
   return (
     <button type="button" onClick={()=>onChange(!v)} className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-bold ${v?"fire-gradient text-white border-transparent":"border-border text-muted-foreground"}`}>
