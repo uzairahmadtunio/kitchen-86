@@ -310,6 +310,9 @@ function OrdersTab() {
                 <div className="text-right flex flex-col items-end gap-1">
                   <span className="sm:hidden font-black text-[var(--gold)] text-sm">{pkr(o.total)}</span>
                   <span className="sm:hidden"><StatusBadge status={o.status} /></span>
+                  {o.payment_screenshot_url && (
+                    <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-black uppercase ${o.payment_verified?"bg-[var(--success)]/15 text-[var(--success)]":"bg-[var(--gold)]/15 text-[var(--gold)]"}`}>{o.payment_verified?"✓ Paid":"⏳ Pending"}</span>
+                  )}
                   <span className="text-[11px] text-muted-foreground">{expanded === o.id ? "Hide" : "View"}</span>
                 </div>
               </button>
@@ -320,10 +323,13 @@ function OrdersTab() {
                     <div><b>Payment:</b> <span className="text-muted-foreground uppercase">{o.payment_method}</span></div>
                     {o.notes && <div className="sm:col-span-2"><b>Notes:</b> <span className="text-muted-foreground">{o.notes}</span></div>}
                   </div>
+                  {o.payment_screenshot_url && (
+                    <PaymentScreenshot order={o} onVerified={()=>qc.invalidateQueries({ queryKey: ["admin","orders"] })} />
+                  )}
                   <div className="rounded-lg border border-border bg-card p-3">
                     {items.map((it: any) => (
                       <div key={it.id} className="flex justify-between text-sm py-1">
-                        <span>{it.quantity}× {it.item_name}</span>
+                        <span>{it.quantity}× {it.item_name}{it.customizations ? <span className="text-[11px] text-muted-foreground"> · {Object.entries(it.customizations).map(([k,v])=>`${k}: ${v}`).join(", ")}</span> : null}</span>
                         <span className="font-bold">{pkr(it.subtotal)}</span>
                       </div>
                     ))}
