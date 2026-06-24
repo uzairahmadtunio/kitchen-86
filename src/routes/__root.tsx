@@ -85,6 +85,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <CartProvider>
         <Outlet />
+        <WhatsAppFloat />
         <Toaster theme="dark" position="top-center" richColors />
       </CartProvider>
     </QueryClientProvider>
