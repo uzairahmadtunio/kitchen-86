@@ -39,12 +39,14 @@ export function ItemDetailModal({
   const [sizeIdx, setSizeIdx] = useState<number>(0);
   const [picked, setPicked] = useState<Record<number, boolean>>({});
   const [qty, setQty] = useState(1);
+  const [spice, setSpice] = useState<string>("Medium");
 
   // Reset state when switching items
   useEffect(() => {
     setSizeIdx(0);
     setPicked({});
     setQty(1);
+    setSpice("Medium");
   }, [item.id]);
 
   // Lock body scroll
@@ -74,11 +76,12 @@ export function ItemDetailModal({
   function handleAdd() {
     const sizeLabel = sizes[sizeIdx]?.label;
     const addonLabels = addons.filter((_, i) => picked[i]).map((a) => a.label);
-    const variantKey = [sizeLabel, ...addonLabels].filter(Boolean).join("|");
-    const id = variantKey ? `${item.id}::${variantKey}` : item.id;
+    const variantKey = [sizeLabel, ...addonLabels, `spice:${spice}`].filter(Boolean).join("|");
+    const id = `${item.id}::${variantKey}`;
     const noteParts: string[] = [];
     if (sizeLabel && sizes.length > 1) noteParts.push(`Size: ${sizeLabel}`);
     if (addonLabels.length) noteParts.push(`Add-ons: ${addonLabels.join(", ")}`);
+    noteParts.push(`Spice: ${spice}`);
     add({
       id,
       itemId: item.id,
@@ -86,7 +89,7 @@ export function ItemDetailModal({
       price: unit,
       image: item.image_url ?? undefined,
       quantity: qty,
-      notes: noteParts.join(" · ") || undefined,
+      notes: noteParts.join(" · "),
     });
     toast.success(`✅ Added ${qty}× ${item.name} to cart`);
     onClose();
