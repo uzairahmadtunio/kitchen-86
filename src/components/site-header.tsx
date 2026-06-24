@@ -57,11 +57,11 @@ export function SiteHeader() {
           <Link to="/track" className="hidden sm:inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2 text-xs font-bold hover:border-primary min-h-11">
             <Package className="h-3.5 w-3.5" /> Track
           </Link>
-          <Link to="/cart" className="relative inline-flex items-center gap-2 rounded-lg fire-gradient px-4 py-2 text-sm font-bold text-white glow-orange transition-transform hover:scale-105 min-h-11">
+          <Link to="/cart" className={`relative inline-flex items-center gap-2 rounded-lg fire-gradient px-4 py-2 text-sm font-bold text-white glow-orange transition-transform hover:scale-105 min-h-11 ${bounce ? "animate-cart-bounce" : ""}`}>
             <ShoppingBag className="h-4 w-4" />
             <span className="hidden sm:inline">Cart</span>
             {count > 0 && (
-              <span className="ml-1 grid h-5 min-w-5 place-items-center rounded-full bg-[var(--gold)] px-1.5 text-[11px] font-black text-black">{count}</span>
+              <span key={count} className="ml-1 grid h-5 min-w-5 place-items-center rounded-full bg-[var(--gold)] px-1.5 text-[11px] font-black text-black animate-badge-pop">{count}</span>
             )}
           </Link>
           <button className="md:hidden grid h-11 w-11 place-items-center rounded-lg border border-border" onClick={() => setOpen((o) => !o)} aria-label="Menu">
