@@ -8,12 +8,13 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { useCart } from "@/lib/cart-context";
 import { pkr } from "@/lib/format";
-import { fetchSettings, fetchAreas } from "@/lib/site-data";
+import { fetchSettings, fetchAreas, fetchPaymentMethods } from "@/lib/site-data";
 import { supabase } from "@/integrations/supabase/client";
 import { saveLastOrder } from "@/lib/last-order";
 
 const settingsQO = queryOptions({ queryKey: ["settings"], queryFn: fetchSettings });
 const areasQO = queryOptions({ queryKey: ["areas"], queryFn: fetchAreas });
+const paymentsQO = queryOptions({ queryKey: ["payment-methods"], queryFn: fetchPaymentMethods });
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — Kitchen 86" }] }),
