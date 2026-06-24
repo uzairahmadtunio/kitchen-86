@@ -14,8 +14,8 @@ export function SiteHeader() {
     { to: "/menu", label: "Menu" },
     { to: "/track", label: "Track Order" },
     { to: "/#deals", label: "Deals" },
-    { to: "/#about", label: "About" },
-    { to: "/#contact", label: "Contact" },
+    { to: "/about", label: "About" },
+    { to: "/contact", label: "Contact" },
   ];
   useEffect(() => {
     if (count > prevCount.current) {
