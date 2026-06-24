@@ -106,6 +106,7 @@ function AdminPage() {
         {tab === "menu" && <MenuTab />}
         {tab === "deals" && <DealsTab />}
         {tab === "areas" && <AreasTab />}
+        {tab === "payments" && <PaymentsTab />}
         {tab === "reviews" && <ReviewsTab />}
         {tab === "settings" && <SettingsTab />}
       </main>
