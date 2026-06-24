@@ -104,6 +104,34 @@ function Checkout() {
 
       clear();
       saveLastOrder({ order_number: order.order_number, phone: form.phone, placed_at: Date.now() });
+
+      // Auto-open WhatsApp with formatted order message
+      try {
+        const waNumber = (settings.whatsapp || "+923064379361").replace(/\D/g, "");
+        const time = new Date().toLocaleString("en-PK", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" });
+        const lines = [
+          `🔥 NEW ORDER ${order.order_number}`,
+          `━━━━━━━━━━━━━━━`,
+          `👤 Name: ${form.name}`,
+          `📱 Phone: ${form.phone}`,
+          `📍 Area: ${areaName}`,
+          `🏠 Address: ${form.address}`,
+          `━━━━━━━━━━━━━━━`,
+          `🛒 ORDER ITEMS:`,
+          ...items.map((i) => `• ${i.name} x${i.quantity} — PKR ${i.price * i.quantity}`),
+          `━━━━━━━━━━━━━━━`,
+          `💰 Subtotal: PKR ${subtotal}`,
+          `🚚 Delivery: PKR ${deliveryCharge}`,
+          `💵 TOTAL: PKR ${total}`,
+          `💳 Payment: ${form.payment.toUpperCase()}`,
+          `━━━━━━━━━━━━━━━`,
+          `⏰ Time: ${time}`,
+          `Kitchen 86 — Station Road Larkana`,
+        ];
+        const url = `https://wa.me/${waNumber}?text=${encodeURIComponent(lines.join("\n"))}`;
+        window.open(url, "_blank");
+      } catch {}
+
       toast.success("Order placed! 🔥");
       navigate({ to: "/order-success", search: { o: order.order_number } });
     } catch (e: any) {
