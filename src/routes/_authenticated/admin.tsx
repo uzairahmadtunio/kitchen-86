@@ -6,6 +6,7 @@ import { Flame, LogOut, ShoppingBag, UtensilsCrossed, Tag, MessageSquare, Settin
 import { supabase } from "@/integrations/supabase/client";
 import { pkr } from "@/lib/format";
 import { MediaUpload } from "@/components/media-upload";
+import { playDing, flashTitle, unlockAlertSound } from "@/lib/new-order-alerts";
 
 const sb = supabase as any;
 
@@ -18,12 +19,39 @@ type Tab = "orders" | "menu" | "deals" | "areas" | "reviews" | "settings";
 
 function AdminPage() {
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const [tab, setTab] = useState<Tab>("orders");
   const [email, setEmail] = useState<string>("");
+  const [newCount, setNewCount] = useState(0);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? ""));
   }, []);
+
+  // Realtime: listen for new orders site-wide while admin is open
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-orders")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "orders" }, (payload: any) => {
+        const o = payload.new ?? {};
+        playDing();
+        flashTitle("🔔 NEW ORDER!");
+        setNewCount((c) => c + 1);
+        toast.success(`🔥 New Order! ${o.order_number ?? ""} — ${o.customer_name ?? ""} — PKR ${o.total ?? ""}`, { duration: 8000 });
+        qc.invalidateQueries({ queryKey: ["admin", "orders"] });
+      })
+      .subscribe();
+
+    // Auto-refresh every 20s as fallback
+    const poll = setInterval(() => {
+      qc.invalidateQueries({ queryKey: ["admin", "orders"] });
+    }, 20_000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(poll);
+    };
+  }, [qc]);
 
   async function logout() {
     await supabase.auth.signOut();
@@ -38,6 +66,12 @@ function AdminPage() {
     { key: "reviews", label: "Reviews", icon: MessageSquare },
     { key: "settings", label: "Settings", icon: SettingsIcon },
   ];
+
+  function selectTab(k: Tab) {
+    unlockAlertSound(); // unlock audio on first user gesture
+    setTab(k);
+    if (k === "orders") setNewCount(0);
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -56,8 +90,11 @@ function AdminPage() {
         </div>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 flex gap-1 overflow-x-auto">
           {tabs.map((t) => (
-            <button key={t.key} onClick={()=>setTab(t.key)} className={`inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 -mb-px ${tab===t.key?"border-primary text-foreground":"border-transparent text-muted-foreground hover:text-foreground"}`}>
+            <button key={t.key} onClick={()=>selectTab(t.key)} className={`relative inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold border-b-2 -mb-px ${tab===t.key?"border-primary text-foreground":"border-transparent text-muted-foreground hover:text-foreground"}`}>
               <t.icon className="h-4 w-4" /> {t.label}
+              {t.key === "orders" && newCount > 0 && (
+                <span className="ml-1 grid place-items-center min-w-5 h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-black animate-pulse">{newCount}</span>
+              )}
             </button>
           ))}
         </div>
