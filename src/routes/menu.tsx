@@ -62,6 +62,7 @@ function MenuPage() {
       <section className="mx-auto max-w-7xl px-4 sm:px-6 py-10 flex-1">
         {active === "deals" ? (
           <div className="grid gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {deals.map((d) => <DealCard key={d.id} deal={d} />)}
           </div>
         ) : active === "all" ? (
           <div className="space-y-12">
