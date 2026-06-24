@@ -141,11 +141,35 @@ function Checkout() {
 
             <Card title="Delivery">
               <Field label="Area">
-                <select className={inputCls} value={form.area} onChange={(e)=>setForm({...form,area:e.target.value})}>
+                <select className={inputCls} value={form.area} onChange={(e)=>setForm({...form,area:e.target.value, customArea: ""})}>
                   <option value="">Select area in Larkana</option>
-                  {areas.map((a) => <option key={a.id} value={a.id}>{a.name} — {pkr(a.charge)} · {a.est_time}</option>)}
+                  {zoneKeys.map((z) => (
+                    <optgroup key={z} label={`${zoneLabel(z)} — ${z === "CUSTOM" ? "Custom charge" : `PKR ${grouped[z][0].charge}`}`}>
+                      {grouped[z].map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.name} {z !== "CUSTOM" ? `— ${pkr(a.charge)} · ${a.est_time}` : ""}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
                 </select>
               </Field>
+              {selectedArea && !isCustom && (
+                <div className="rounded-lg border border-border bg-[var(--secondary-bg)] px-3 py-2 text-xs">
+                  <span className="text-muted-foreground">Delivery charge:</span> <b className="text-[var(--gold)]">{pkr(deliveryCharge)}</b>
+                  <span className="text-muted-foreground"> · ETA:</span> <b>{selectedArea.est_time}</b>
+                </div>
+              )}
+              {isCustom && (
+                <>
+                  <Field label="Please describe your area">
+                    <input className={inputCls} value={form.customArea} onChange={(e)=>setForm({...form,customArea:e.target.value})} placeholder="e.g. Near XYZ school, behind ABC market" />
+                  </Field>
+                  <div className="rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2 text-xs text-[var(--gold)]">
+                    🟡 Delivery charge PKR 100 — Admin will confirm exact charge on WhatsApp
+                  </div>
+                </>
+              )}
               <Field label="Address"><textarea className={inputCls} rows={3} value={form.address} onChange={(e)=>setForm({...form,address:e.target.value})} placeholder="House #, Street, Landmark" /></Field>
               <Field label="Notes (optional)"><textarea className={inputCls} rows={2} value={form.notes} onChange={(e)=>setForm({...form,notes:e.target.value})} placeholder="Extra sauce, no onions, etc." /></Field>
             </Card>
