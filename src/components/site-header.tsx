@@ -7,6 +7,8 @@ import { OrderTrackingBanner } from "@/components/order-tracking-banner";
 export function SiteHeader() {
   const { count } = useCart();
   const [open, setOpen] = useState(false);
+  const [bounce, setBounce] = useState(false);
+  const prevCount = useRef(count);
   const links = [
     { to: "/", label: "Home" },
     { to: "/menu", label: "Menu" },
@@ -15,6 +17,15 @@ export function SiteHeader() {
     { to: "/#about", label: "About" },
     { to: "/#contact", label: "Contact" },
   ];
+  useEffect(() => {
+    if (count > prevCount.current) {
+      setBounce(true);
+      const t = setTimeout(() => setBounce(false), 650);
+      prevCount.current = count;
+      return () => clearTimeout(t);
+    }
+    prevCount.current = count;
+  }, [count]);
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
