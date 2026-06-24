@@ -349,6 +349,8 @@ function DealsTab() {
 function ReviewsTab() {
   const qc = useQueryClient();
   const { data: reviews = [] } = useQuery({ queryKey:["admin","reviews"], queryFn: async()=>{const {data}=await sb.from("reviews").select("*").order("created_at",{ascending:false}); return data ?? [];}});
+  const [editing, setEditing] = useState<any | null>(null);
+
   async function approve(id: string, v: boolean) {
     await sb.from("reviews").update({ is_approved: v }).eq("id", id);
     toast.success(v?"Approved":"Hidden");
@@ -360,33 +362,83 @@ function ReviewsTab() {
     await sb.from("reviews").delete().eq("id", id);
     toast.success("Deleted");
     qc.invalidateQueries({ queryKey:["admin","reviews"] });
+    qc.invalidateQueries({ queryKey:["reviews-approved"] });
   }
+  async function save(r: any) {
+    const { id, ...rest } = r;
+    if (!rest.customer_name?.trim()) return toast.error("Name required");
+    if (!rest.rating || rest.rating < 1) return toast.error("Pick a rating");
+    const action = id ? sb.from("reviews").update(rest).eq("id", id) : sb.from("reviews").insert(rest);
+    const { error } = await action;
+    if (error) return toast.error(error.message);
+    toast.success("Saved");
+    setEditing(null);
+    qc.invalidateQueries({ queryKey:["admin","reviews"] });
+    qc.invalidateQueries({ queryKey:["reviews-approved"] });
+  }
+
   return (
     <div>
-      <h2 className="text-2xl font-black mb-5">Reviews</h2>
+      <div className="flex justify-between mb-5">
+        <h2 className="text-2xl font-black">Reviews</h2>
+        <button onClick={()=>setEditing({ customer_name:"", rating:5, comment:"", video_url:"", is_approved:true })} className="inline-flex items-center gap-1 rounded-lg fire-gradient px-4 py-2 text-sm font-bold text-white"><Plus className="h-4 w-4"/> Add Review</button>
+      </div>
       <div className="space-y-3">
         {reviews.map((r: any) => (
           <div key={r.id} className="rounded-2xl border border-border bg-card p-5">
-            <div className="flex justify-between mb-2">
-              <div>
-                <div className="font-bold">{r.customer_name}</div>
-                <div className="flex gap-0.5 text-[var(--gold)] mt-1">{Array.from({length:r.rating}).map((_,i)=><Star key={i} className="h-3.5 w-3.5 fill-current"/>)}</div>
+            <div className="flex gap-4">
+              {r.video_url && <video src={r.video_url} className="h-24 w-32 rounded-lg object-cover bg-black border border-border" muted controls />}
+              <div className="flex-1">
+                <div className="flex justify-between mb-2">
+                  <div>
+                    <div className="font-bold">{r.customer_name} {r.is_approved && <span className="ml-2 text-[10px] uppercase font-black text-[var(--success)]">live</span>}</div>
+                    <div className="flex gap-0.5 text-[var(--gold)] mt-1">{Array.from({length:r.rating}).map((_,i)=><Star key={i} className="h-3.5 w-3.5 fill-current"/>)}</div>
+                  </div>
+                  <div className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</div>
+                </div>
+                <p className="text-sm text-muted-foreground">{r.comment}</p>
+                <div className="mt-3 flex gap-2 flex-wrap">
+                  {r.is_approved ? (
+                    <button onClick={()=>approve(r.id,false)} className="rounded-lg border border-border px-3 py-1.5 text-xs font-bold">Hide</button>
+                  ) : (
+                    <button onClick={()=>approve(r.id,true)} className="inline-flex items-center gap-1 rounded-lg fire-gradient px-3 py-1.5 text-xs font-bold text-white"><Check className="h-3 w-3"/>Approve</button>
+                  )}
+                  <button onClick={()=>setEditing(r)} className="inline-flex items-center gap-1 rounded-lg border border-border px-3 py-1.5 text-xs font-bold hover:border-primary"><Pencil className="h-3 w-3"/>Edit</button>
+                  <button onClick={()=>del(r.id)} className="rounded-lg border border-border px-3 py-1.5 text-xs font-bold text-destructive"><Trash2 className="h-3 w-3"/></button>
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</div>
-            </div>
-            <p className="text-sm text-muted-foreground">{r.comment}</p>
-            <div className="mt-3 flex gap-2">
-              {r.is_approved ? (
-                <button onClick={()=>approve(r.id,false)} className="rounded-lg border border-border px-3 py-1.5 text-xs font-bold">Hide</button>
-              ) : (
-                <button onClick={()=>approve(r.id,true)} className="inline-flex items-center gap-1 rounded-lg fire-gradient px-3 py-1.5 text-xs font-bold text-white"><Check className="h-3 w-3"/>Approve</button>
-              )}
-              <button onClick={()=>del(r.id)} className="rounded-lg border border-border px-3 py-1.5 text-xs font-bold text-destructive"><Trash2 className="h-3 w-3"/></button>
             </div>
           </div>
         ))}
         {reviews.length === 0 && <div className="rounded-2xl border border-border bg-card p-12 text-center text-muted-foreground">No reviews yet</div>}
       </div>
+
+      {editing && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur grid place-items-center p-4 overflow-y-auto" onClick={()=>setEditing(null)}>
+          <div className="w-full max-w-lg my-8 rounded-2xl border border-border bg-card p-6" onClick={(e)=>e.stopPropagation()}>
+            <h3 className="text-xl font-black mb-4">{editing.id?"Edit":"New"} Review</h3>
+            <div className="space-y-3">
+              <FormField label="Customer name"><input className={ic} value={editing.customer_name} onChange={(e)=>setEditing({...editing,customer_name:e.target.value})}/></FormField>
+              <FormField label="Rating">
+                <div className="flex gap-1">
+                  {[1,2,3,4,5].map((n) => (
+                    <button key={n} type="button" onClick={()=>setEditing({...editing,rating:n})} className={`p-1 ${n<=editing.rating?"text-[var(--gold)]":"text-muted-foreground"}`}>
+                      <Star className={`h-6 w-6 ${n<=editing.rating?"fill-current":""}`} />
+                    </button>
+                  ))}
+                </div>
+              </FormField>
+              <FormField label="Comment"><textarea className={ic} rows={3} value={editing.comment ?? ""} onChange={(e)=>setEditing({...editing,comment:e.target.value})}/></FormField>
+              <FormField label="Video (optional)"><MediaUpload value={editing.video_url ?? ""} onChange={(v)=>setEditing({...editing,video_url:v})} folder="reviews" kind="video" /></FormField>
+              <Toggle label="Show on site (approved)" v={editing.is_approved} onChange={(v)=>setEditing({...editing,is_approved:v})} />
+            </div>
+            <div className="mt-5 flex gap-2 justify-end">
+              <button onClick={()=>setEditing(null)} className="rounded-lg border border-border px-4 py-2 text-sm font-bold">Cancel</button>
+              <button onClick={()=>save(editing)} className="rounded-lg fire-gradient px-4 py-2 text-sm font-bold text-white">Save</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
