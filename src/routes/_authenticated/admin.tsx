@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Flame, LogOut, ShoppingBag, UtensilsCrossed, Tag, MessageSquare, Settings as SettingsIcon, Star, Trash2, Pencil, Plus, Check, X, Truck } from "lucide-react";
+import { Flame, LogOut, ShoppingBag, UtensilsCrossed, Tag, MessageSquare, Settings as SettingsIcon, Star, Trash2, Pencil, Plus, Check, X, Truck, CreditCard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { pkr } from "@/lib/format";
 import { MediaUpload } from "@/components/media-upload";
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
 });
 
-type Tab = "orders" | "menu" | "deals" | "areas" | "reviews" | "settings";
+type Tab = "orders" | "menu" | "deals" | "areas" | "payments" | "reviews" | "settings";
 
 function AdminPage() {
   const navigate = useNavigate();
@@ -63,6 +63,7 @@ function AdminPage() {
     { key: "menu", label: "Menu", icon: UtensilsCrossed },
     { key: "deals", label: "Deals", icon: Tag },
     { key: "areas", label: "Delivery Areas", icon: Truck },
+    { key: "payments", label: "Payments", icon: CreditCard },
     { key: "reviews", label: "Reviews", icon: MessageSquare },
     { key: "settings", label: "Settings", icon: SettingsIcon },
   ];
@@ -105,6 +106,7 @@ function AdminPage() {
         {tab === "menu" && <MenuTab />}
         {tab === "deals" && <DealsTab />}
         {tab === "areas" && <AreasTab />}
+        {tab === "payments" && <PaymentsTab />}
         {tab === "reviews" && <ReviewsTab />}
         {tab === "settings" && <SettingsTab />}
       </main>
@@ -621,6 +623,111 @@ function AreasTab() {
                 <FormField label="Charge (PKR)"><input type="number" className={ic} value={editing.charge} onChange={(e) => setEditing({ ...editing, charge: Number(e.target.value) })} /></FormField>
               </div>
               <FormField label="Estimated Time"><input className={ic} value={editing.est_time ?? ""} onChange={(e) => setEditing({ ...editing, est_time: e.target.value })} placeholder="e.g. 20-30 mins" /></FormField>
+              <Toggle label="Active" v={editing.is_active} onChange={(v) => setEditing({ ...editing, is_active: v })} />
+            </div>
+            <div className="mt-5 flex gap-2 justify-end">
+              <button onClick={() => setEditing(null)} className="rounded-lg border border-border px-4 py-2 text-sm font-bold">Cancel</button>
+              <button onClick={() => save(editing)} className="rounded-lg fire-gradient px-4 py-2 text-sm font-bold text-white">Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* -------- PAYMENTS -------- */
+function PaymentsTab() {
+  const qc = useQueryClient();
+  const { data: methods = [] } = useQuery({
+    queryKey: ["admin", "payment-methods"],
+    queryFn: async () => {
+      const { data } = await sb.from("payment_methods").select("*").order("sort_order");
+      return data ?? [];
+    },
+  });
+  const [editing, setEditing] = useState<any | null>(null);
+
+  async function save(m: any) {
+    if (!m.code?.trim() || !m.label?.trim()) return toast.error("Code and label required");
+    const { id, created_at, updated_at, ...rest } = m;
+    rest.sort_order = Number(rest.sort_order) || 0;
+    const action = id ? sb.from("payment_methods").update(rest).eq("id", id) : sb.from("payment_methods").insert(rest);
+    const { error } = await action;
+    if (error) return toast.error(error.message);
+    toast.success("Saved");
+    setEditing(null);
+    qc.invalidateQueries({ queryKey: ["admin", "payment-methods"] });
+    qc.invalidateQueries({ queryKey: ["payment-methods"] });
+  }
+  async function toggleActive(m: any) {
+    const { error } = await sb.from("payment_methods").update({ is_active: !m.is_active }).eq("id", m.id);
+    if (error) return toast.error(error.message);
+    qc.invalidateQueries({ queryKey: ["admin", "payment-methods"] });
+    qc.invalidateQueries({ queryKey: ["payment-methods"] });
+  }
+  async function del(id: string) {
+    if (!confirm("Delete this payment method?")) return;
+    const { error } = await sb.from("payment_methods").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Deleted");
+    qc.invalidateQueries({ queryKey: ["admin", "payment-methods"] });
+    qc.invalidateQueries({ queryKey: ["payment-methods"] });
+  }
+
+  return (
+    <div>
+      <div className="flex justify-between mb-5">
+        <div>
+          <h2 className="text-2xl font-black">Payment Methods</h2>
+          <p className="text-sm text-muted-foreground mt-1">Add or edit payment options shown on checkout.</p>
+        </div>
+        <button onClick={() => setEditing({ code: "", label: "", description: "", instructions: "", account_title: "", account_number: "", icon: "💳", is_active: true, sort_order: methods.length + 1 })} className="inline-flex items-center gap-1 rounded-lg fire-gradient px-4 py-2 text-sm font-bold text-white"><Plus className="h-4 w-4" /> Add Method</button>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card divide-y divide-border">
+        {methods.length === 0 && <div className="p-8 text-center text-muted-foreground">No payment methods yet</div>}
+        {methods.map((m: any) => (
+          <div key={m.id} className="grid grid-cols-[auto_1fr_auto] gap-3 items-center px-5 py-4">
+            <div className="text-2xl">{m.icon || "💳"}</div>
+            <div className="min-w-0">
+              <div className="font-bold flex items-center gap-2">
+                {m.label}
+                <span className="rounded-full bg-[var(--secondary-bg)] border border-border px-2 py-0.5 text-[10px] font-mono uppercase">{m.code}</span>
+              </div>
+              {m.description && <div className="text-xs text-muted-foreground truncate">{m.description}</div>}
+              {m.account_number && <div className="text-[11px] font-mono text-[var(--gold)] mt-0.5">{m.account_title} · {m.account_number}</div>}
+            </div>
+            <div className="flex items-center gap-2">
+              <button onClick={() => toggleActive(m)} className={`rounded-full w-10 h-5 relative transition ${m.is_active ? "bg-[var(--success)]" : "bg-muted"}`}>
+                <span className={`absolute top-0.5 ${m.is_active ? "right-0.5" : "left-0.5"} h-4 w-4 rounded-full bg-white transition`}></span>
+              </button>
+              <button onClick={() => setEditing(m)} className="rounded-lg border border-border px-2 py-1.5 text-xs font-bold hover:border-primary"><Pencil className="h-3 w-3" /></button>
+              <button onClick={() => del(m.id)} className="rounded-lg border border-border px-2 py-1.5 text-xs font-bold text-destructive hover:border-destructive"><Trash2 className="h-3 w-3" /></button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {editing && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur grid place-items-center p-4" onClick={() => setEditing(null)}>
+          <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-xl font-black mb-4">{editing.id ? "Edit" : "New"} Payment Method</h3>
+            <div className="space-y-3">
+              <div className="grid grid-cols-[80px_1fr] gap-3">
+                <FormField label="Icon"><input className={ic} value={editing.icon ?? ""} onChange={(e) => setEditing({ ...editing, icon: e.target.value })} placeholder="💵" /></FormField>
+                <FormField label="Label"><input className={ic} value={editing.label} onChange={(e) => setEditing({ ...editing, label: e.target.value })} placeholder="Cash on Delivery" /></FormField>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <FormField label="Code (unique)"><input className={ic} value={editing.code} onChange={(e) => setEditing({ ...editing, code: e.target.value.toLowerCase().replace(/\s+/g, "_") })} placeholder="cod" /></FormField>
+                <FormField label="Sort Order"><input type="number" className={ic} value={editing.sort_order} onChange={(e) => setEditing({ ...editing, sort_order: Number(e.target.value) })} /></FormField>
+              </div>
+              <FormField label="Short Description"><input className={ic} value={editing.description ?? ""} onChange={(e) => setEditing({ ...editing, description: e.target.value })} placeholder="Pay when it arrives" /></FormField>
+              <FormField label="Instructions (shown after select)"><textarea rows={2} className={ic} value={editing.instructions ?? ""} onChange={(e) => setEditing({ ...editing, instructions: e.target.value })} placeholder="Send screenshot to WhatsApp after payment" /></FormField>
+              <div className="grid grid-cols-2 gap-3">
+                <FormField label="Account Title"><input className={ic} value={editing.account_title ?? ""} onChange={(e) => setEditing({ ...editing, account_title: e.target.value })} placeholder="Kitchen 86" /></FormField>
+                <FormField label="Account Number"><input className={ic} value={editing.account_number ?? ""} onChange={(e) => setEditing({ ...editing, account_number: e.target.value })} placeholder="0300-1234567" /></FormField>
+              </div>
               <Toggle label="Active" v={editing.is_active} onChange={(v) => setEditing({ ...editing, is_active: v })} />
             </div>
             <div className="mt-5 flex gap-2 justify-end">

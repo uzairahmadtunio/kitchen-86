@@ -8,18 +8,20 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { useCart } from "@/lib/cart-context";
 import { pkr } from "@/lib/format";
-import { fetchSettings, fetchAreas } from "@/lib/site-data";
+import { fetchSettings, fetchAreas, fetchPaymentMethods } from "@/lib/site-data";
 import { supabase } from "@/integrations/supabase/client";
 import { saveLastOrder } from "@/lib/last-order";
 
 const settingsQO = queryOptions({ queryKey: ["settings"], queryFn: fetchSettings });
 const areasQO = queryOptions({ queryKey: ["areas"], queryFn: fetchAreas });
+const paymentsQO = queryOptions({ queryKey: ["payment-methods"], queryFn: fetchPaymentMethods });
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Checkout — Kitchen 86" }] }),
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(settingsQO);
     context.queryClient.ensureQueryData(areasQO);
+    context.queryClient.ensureQueryData(paymentsQO);
   },
   component: Checkout,
 });
@@ -30,17 +32,20 @@ const schema = z.object({
   address: z.string().trim().min(8, "Enter delivery address").max(500),
   area: z.string().min(1, "Select delivery area"),
   notes: z.string().max(500).optional(),
-  payment: z.enum(["cod", "online"]),
+  payment: z.string().min(1, "Select a payment method"),
 });
 
 function Checkout() {
   const { data: settings } = useSuspenseQuery(settingsQO);
   const { data: areas } = useSuspenseQuery(areasQO);
+  const { data: paymentMethods } = useSuspenseQuery(paymentsQO);
   const { items, subtotal, clear } = useCart();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({ name: "", phone: "", address: "", area: "", customArea: "", notes: "", payment: "cod" as "cod" | "online" });
+  const defaultPayment = paymentMethods[0]?.code ?? "cod";
+  const [form, setForm] = useState({ name: "", phone: "", address: "", area: "", customArea: "", notes: "", payment: defaultPayment });
   const [submitting, setSubmitting] = useState(false);
+  const selectedPayment = paymentMethods.find((p) => p.code === form.payment);
 
   const selectedArea = areas.find((a) => a.id === form.area);
   const isCustom = (selectedArea?.zone ?? "").toLowerCase() === "custom";
@@ -203,14 +208,30 @@ function Checkout() {
             </Card>
 
             <Card title="Payment">
-              <div className="grid grid-cols-2 gap-3">
-                {([["cod","Cash on Delivery"],["online","Online (Soon)"]] as const).map(([v,l]) => (
-                  <button key={v} type="button" onClick={()=>v==="cod"&&setForm({...form,payment:v})} disabled={v==="online"} className={`rounded-xl border-2 p-4 text-left ${form.payment===v?"border-primary bg-[var(--secondary-bg)]":"border-border"} disabled:opacity-40`}>
-                    <div className="font-bold text-sm">{l}</div>
-                    <div className="text-xs text-muted-foreground mt-1">{v==="cod"?"Pay when it arrives 🔥":"Coming soon"}</div>
-                  </button>
-                ))}
-              </div>
+              {paymentMethods.length === 0 ? (
+                <div className="text-sm text-muted-foreground">No payment methods available right now.</div>
+              ) : (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {paymentMethods.map((p) => {
+                    const active = form.payment === p.code;
+                    return (
+                      <button key={p.id} type="button" onClick={() => setForm({ ...form, payment: p.code })} className={`rounded-xl border-2 p-4 text-left transition ${active ? "border-primary bg-[var(--secondary-bg)]" : "border-border hover:border-primary/50"}`}>
+                        <div className="flex items-center gap-2 font-bold text-sm">
+                          {p.icon && <span className="text-lg leading-none">{p.icon}</span>}{p.label}
+                        </div>
+                        {p.description && <div className="text-xs text-muted-foreground mt-1">{p.description}</div>}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {selectedPayment && (selectedPayment.instructions || selectedPayment.account_number) && (
+                <div className="mt-3 rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2.5 text-xs space-y-1">
+                  {selectedPayment.instructions && <div className="text-foreground">{selectedPayment.instructions}</div>}
+                  {selectedPayment.account_title && <div><span className="text-muted-foreground">Account Title:</span> <b>{selectedPayment.account_title}</b></div>}
+                  {selectedPayment.account_number && <div><span className="text-muted-foreground">Account #:</span> <b className="font-mono text-[var(--gold)]">{selectedPayment.account_number}</b></div>}
+                </div>
+              )}
             </Card>
           </div>
 

@@ -317,6 +317,51 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_methods: {
+        Row: {
+          account_number: string | null
+          account_title: string | null
+          code: string
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          instructions: string | null
+          is_active: boolean
+          label: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          account_number?: string | null
+          account_title?: string | null
+          code: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          label: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          account_number?: string | null
+          account_title?: string | null
+          code?: string
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          instructions?: string | null
+          is_active?: boolean
+          label?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           comment: string | null
