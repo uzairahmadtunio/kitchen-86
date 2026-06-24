@@ -59,3 +59,7 @@ export async function fetchApprovedReviews(): Promise<Review[]> {
   const { data } = await sb.from("reviews").select("*").eq("is_approved", true).order("created_at", { ascending: false }).limit(12);
   return data ?? [];
 }
+export async function fetchPaymentMethods(): Promise<PaymentMethod[]> {
+  const { data } = await sb.from("payment_methods").select("*").eq("is_active", true).order("sort_order");
+  return (data ?? []) as PaymentMethod[];
+}
