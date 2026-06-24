@@ -12,7 +12,7 @@ export type CartItem = {
 
 type CartCtx = {
   items: CartItem[];
-  add: (item: Omit<CartItem, "quantity"> & { quantity?: number; id?: string }) => void;
+  add: (item: Omit<CartItem, "quantity" | "id"> & { quantity?: number; id?: string }) => void;
   remove: (id: string) => void;
   update: (id: string, qty: number) => void;
   clear: () => void;
