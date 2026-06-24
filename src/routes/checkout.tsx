@@ -208,14 +208,30 @@ function Checkout() {
             </Card>
 
             <Card title="Payment">
-              <div className="grid grid-cols-2 gap-3">
-                {([["cod","Cash on Delivery"],["online","Online (Soon)"]] as const).map(([v,l]) => (
-                  <button key={v} type="button" onClick={()=>v==="cod"&&setForm({...form,payment:v})} disabled={v==="online"} className={`rounded-xl border-2 p-4 text-left ${form.payment===v?"border-primary bg-[var(--secondary-bg)]":"border-border"} disabled:opacity-40`}>
-                    <div className="font-bold text-sm">{l}</div>
-                    <div className="text-xs text-muted-foreground mt-1">{v==="cod"?"Pay when it arrives 🔥":"Coming soon"}</div>
-                  </button>
-                ))}
-              </div>
+              {paymentMethods.length === 0 ? (
+                <div className="text-sm text-muted-foreground">No payment methods available right now.</div>
+              ) : (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {paymentMethods.map((p) => {
+                    const active = form.payment === p.code;
+                    return (
+                      <button key={p.id} type="button" onClick={() => setForm({ ...form, payment: p.code })} className={`rounded-xl border-2 p-4 text-left transition ${active ? "border-primary bg-[var(--secondary-bg)]" : "border-border hover:border-primary/50"}`}>
+                        <div className="flex items-center gap-2 font-bold text-sm">
+                          {p.icon && <span className="text-lg leading-none">{p.icon}</span>}{p.label}
+                        </div>
+                        {p.description && <div className="text-xs text-muted-foreground mt-1">{p.description}</div>}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {selectedPayment && (selectedPayment.instructions || selectedPayment.account_number) && (
+                <div className="mt-3 rounded-lg border border-[var(--gold)]/40 bg-[var(--gold)]/10 px-3 py-2.5 text-xs space-y-1">
+                  {selectedPayment.instructions && <div className="text-foreground">{selectedPayment.instructions}</div>}
+                  {selectedPayment.account_title && <div><span className="text-muted-foreground">Account Title:</span> <b>{selectedPayment.account_title}</b></div>}
+                  {selectedPayment.account_number && <div><span className="text-muted-foreground">Account #:</span> <b className="font-mono text-[var(--gold)]">{selectedPayment.account_number}</b></div>}
+                </div>
+              )}
             </Card>
           </div>
 
