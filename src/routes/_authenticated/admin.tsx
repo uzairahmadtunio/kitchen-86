@@ -881,22 +881,9 @@ function PaymentsTab() {
 
 /* -------- PAYMENT SCREENSHOT VIEW -------- */
 function PaymentScreenshot({ order, onVerified }: { order: any; onVerified: () => void }) {
-  const [url, setUrl] = useState<string>("");
+  const url: string = order.payment_screenshot_url ?? "";
   const [lightbox, setLightbox] = useState(false);
   const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const raw: string = order.payment_screenshot_url ?? "";
-      if (!raw) return;
-      // Path like "payment-screenshots/abc.jpg" or just "abc.jpg"
-      const path = raw.includes("/") ? raw.split("/").slice(-2).join("/").replace(/^payment-screenshots\//, "") : raw;
-      const { data } = await sb.storage.from("payment-screenshots").createSignedUrl(path, 60 * 60);
-      if (!cancelled && data?.signedUrl) setUrl(data.signedUrl);
-    })();
-    return () => { cancelled = true; };
-  }, [order.payment_screenshot_url]);
 
   async function verify(v: boolean) {
     setBusy(true);
