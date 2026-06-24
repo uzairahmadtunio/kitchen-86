@@ -65,15 +65,26 @@ function Checkout() {
     if (!parsed.success) { toast.error(parsed.error.issues[0].message); return; }
     if (!items.length) { toast.error("Your cart is empty"); return; }
 
+    if (isCustom && form.customArea.trim().length < 3) {
+      toast.error("Please describe your area"); return;
+    }
+
     setSubmitting(true);
     try {
+      const areaName = isCustom
+        ? `Other / Custom — ${form.customArea.trim()}`
+        : (selectedArea?.name ?? null);
+      const composedNotes = isCustom
+        ? `[Custom area — charge to be confirmed on WhatsApp]\n${form.notes || ""}`.trim()
+        : (form.notes || null);
+
       const { data: order, error } = await (supabase as any).from("orders").insert({
         customer_name: form.name,
         customer_phone: form.phone,
-        delivery_area: selectedArea?.name ?? null,
+        delivery_area: areaName,
         delivery_charge: deliveryCharge,
         address: form.address,
-        notes: form.notes || null,
+        notes: composedNotes,
         payment_method: form.payment,
         subtotal,
         total,
